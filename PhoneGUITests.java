@@ -1,14 +1,16 @@
 package iowrapper;
 
 import android.GUIController;
-import android.day.ActivityDay;
-import android.util.Log;
+import android.setup.ActivityCreateGame;
+import android.setup.SetupScreenController;
+import android.widget.CheckBox;
 import junit.framework.TestCase;
 import shared.ai.Computer;
 import shared.logic.Player;
 import shared.logic.PlayerList;
 import shared.logic.exceptions.PlayerTargetingException;
 import shared.logic.support.Random;
+import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
 import shared.roles.Driver;
 
@@ -65,7 +67,6 @@ public class PhoneGUITests extends TestCase{
 	
 	public void testDoubleClick(){
 		IOWrapper wrap = new IOWrapper();
-		Log.i = true;
 		
 		Host h = wrap.startHost();
 		
@@ -92,7 +93,37 @@ public class PhoneGUITests extends TestCase{
 		
 		while(h.getNarrator().isInProgress())
 			h.doubleClick();
+	}
+	
+	public void testRuleText(){
+		IOWrapper wrap = new IOWrapper();
+		
+		Host h = wrap.startHost();
+		
+		h.addRole(BasicRoles.Consort(), "Mafia");
+		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
+		SetupScreenController sc = ac.getManager().screenController;
+				
 		
 		
+		CheckBox blockCB = sc.cBox[0];
+		boolean prevVal = blockCB.isChecked();
+		assertEquals(h.getNarrator().getRules().getBool(Rules.ROLE_BLOCK_IMMUNE), prevVal);
+		blockCB.toggle();
+		assertEquals(h.getNarrator().getRules().getBool(Rules.ROLE_BLOCK_IMMUNE), blockCB.isChecked());
+		
+		//click, test if value has changed
+	}
+	
+	public void testRemoveRole(){
+		IOWrapper wrap = new IOWrapper();
+		
+		Host h = wrap.startHost();
+		
+		h.addRole(BasicRoles.Consort(), "Mafia");
+		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
+		ac.rolesListLV.click(0);
+		
+		assertTrue(h.getNarrator().getAllRoles().isEmpty());
 	}
 }
