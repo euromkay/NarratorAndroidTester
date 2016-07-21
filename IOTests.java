@@ -4,7 +4,10 @@ import java.util.Random;
 
 import android.CommunicatorPhone;
 import android.GUIController;
+import android.NActivity;
+import android.app.Environment;
 import android.day.ActivityDay;
+import android.setup.ActivityCreateGame;
 import android.util.Log;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -18,32 +21,32 @@ import shared.logic.Team;
 import shared.logic.exceptions.IllegalActionException;
 import shared.logic.exceptions.PlayerTargetingException;
 import shared.logic.templates.BasicRoles;
+import shared.roles.Blocker;
 import shared.roles.Bodyguard;
-import shared.roles.Chauffeur;
-import shared.roles.Executioner;
+import shared.roles.Driver;
 import shared.roles.Mayor;
 import shared.roles.RandomRole;
 
 public class IOTests extends TestCase{
 	private Interacter i;
 	
-	Narrator n;
+	
 	
 	public IOTests(String name) {
-		//super(name);
+		super(name);
 	}
 	
 	public void testSingleHost(){
-		for (int j = 0; j < 5; j++){
-		IOWrapper wrap = new IOWrapper(this);
+		for (int j = 0; j < 10; j++){
+		IOWrapper wrap = new IOWrapper();
 		
-		long seed = new Random().nextLong();
-		//long seed = Long.parseLong("-625777195643370629");
-		//System.out.println(seed);
+		//long seed = new Random().nextLong();
+		long seed = Long.parseLong("6563289330430437151");
+		System.out.println(seed);
 		Host h = wrap.startHost(seed);
 		
-		h.addRole(BasicRoles.MassMurderer());
-		h.addRole(BasicRoles.CultLeader());
+		h.addRole(BasicRoles.MassMurderer(), "Neutrals");
+		h.addRole(BasicRoles.CultLeader(), "Neutrals");
 		h.addRandomRole();
 		h.addRandomRole();
 		h.addRandomRole();
@@ -72,7 +75,7 @@ public class IOTests extends TestCase{
 	}
 	
 	public void testSingleConnection(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 		long seed = new Random().nextLong();
 		//long seed = Long.parseLong("-616941299922450565");
 		System.out.println(seed);
@@ -84,14 +87,14 @@ public class IOTests extends TestCase{
 		
 		Client c1 = wrap.startClient("Inet1");
 		
-		h.addRole(BasicRoles.Chauffeur());
+		h.addRole(BasicRoles.Chauffeur(), Mafia);
 		
 		assertEquals(c1.getNarrator().getAllRoles().size(), 1);
 		
-		h.addRole(BasicRoles.Bodyguard());
+		h.addRole(BasicRoles.Bodyguard(), Town);
 		assertEquals(c1.getNarrator().getAllRoles().size(), 2);
 		
-		h.addRole(BasicRoles.Mayor());
+		h.addRole(BasicRoles.Mayor(), Town);
 
 		assertTrue(n1.getAllPlayers().get(0).getCommunicator().getClass() == CommunicatorPhone.class);
 		h.clickStart(seed);
@@ -126,9 +129,9 @@ public class IOTests extends TestCase{
 		Controller h_control = h.getController();
 		Controller c_control = c1.getController();
 		
-		assertTrue(bg.is(Bodyguard.ROLE_NAME));
-		assertTrue(mayor.is(Mayor.ROLE_NAME));
-		assertTrue(chauf.is(Chauffeur.ROLE_NAME));
+		assertTrue(bg.is(Bodyguard.class));
+		assertTrue(mayor.is(Mayor.class));
+		assertTrue(chauf.is(Driver.class));
 		
 		assertTrue(h.getNarrator().isNight());
 
@@ -163,8 +166,8 @@ public class IOTests extends TestCase{
 			Log.m(TAG, "waiting for " + i .getName() + " to change to night");
 		}
 		
-		c_control.setNightTarget(chauf, mayor, Chauffeur.TARGET1);
-		c_control.setNightTarget(chauf, bg, Chauffeur.TARGET2);
+		c_control.setNightTarget(chauf, mayor, Driver.TARGET1);
+		c_control.setNightTarget(chauf, bg, Driver.TARGET2);
 		c_control.endNight(chauf);
 		
 		h_control.endNight(bg);
@@ -181,7 +184,7 @@ public class IOTests extends TestCase{
 		}
 		
 		c_control.setNightTarget(chauf, mayor, Team.KILL);
-		h_control.setNightTarget(bg, mayor, bg.getRole().getKeyWord());
+		h_control.setNightTarget(bg, mayor, Bodyguard.GUARD);
 		
 
 		c_control.endNight(chauf);
@@ -200,7 +203,7 @@ public class IOTests extends TestCase{
 	}
 	
 	public void testSingleConnectionClientSub(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 		long seed = new Random().nextLong();
 		//long seed = Long.parseLong("-616941299922450565");
 		//System.out.println(seed);
@@ -210,12 +213,12 @@ public class IOTests extends TestCase{
 		Client c1 = wrap.startClient("Inet1");
 		c1.newPlayer("Inet2");
 		
-		h.addRole(BasicRoles.Chauffeur());
+		h.addRole(BasicRoles.Chauffeur(), Mafia);
 		assertEquals(c1.getNarrator().getAllRoles().size(), 1);
 		
-		h.addRole(BasicRoles.Bodyguard());
+		h.addRole(BasicRoles.Bodyguard(), Town);
 		assertEquals(c1.getNarrator().getAllRoles().size(), 2);
-		h.addRole(BasicRoles.Mayor());
+		h.addRole(BasicRoles.Mayor(), Town);
 		h.dayStart();
 		
 		h.clickStart(seed);
@@ -244,9 +247,9 @@ public class IOTests extends TestCase{
 		Controller h_control = h.getController();
 		Controller c_control = c1.getController();
 		
-		assertTrue(bg.is(Bodyguard.ROLE_NAME));
-		assertTrue(mayor.is(Mayor.ROLE_NAME));
-		assertTrue(chauf.is(Chauffeur.ROLE_NAME));
+		assertTrue(bg.is(Bodyguard.class));
+		assertTrue(mayor.is(Mayor.class));
+		assertTrue(chauf.is(Driver.class));
 		
 		assertTrue(h.getNarrator().isDay());
 		
@@ -281,8 +284,8 @@ public class IOTests extends TestCase{
 			Log.m(TAG, "waiting for " + i .getName() + " to change to night");
 		}
 		
-		c_control.setNightTarget(chauf, mayor, Chauffeur.TARGET1);
-		c_control.setNightTarget(chauf, bg, Chauffeur.TARGET2);
+		c_control.setNightTarget(chauf, mayor, Driver.TARGET1);
+		c_control.setNightTarget(chauf, bg, Driver.TARGET2);
 		c_control.endNight(chauf);
 		
 		h_control.endNight(bg);
@@ -299,7 +302,7 @@ public class IOTests extends TestCase{
 		}
 		
 		c_control.setNightTarget(chauf, mayor, Team.KILL);
-		h_control.setNightTarget(bg, mayor, bg.getRole().getKeyWord());
+		h_control.setNightTarget(bg, mayor, Bodyguard.GUARD);
 		
 
 		c_control.endNight(chauf);
@@ -327,7 +330,7 @@ public class IOTests extends TestCase{
 	}
 	
 	public void tesstZMassive(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 
 		long seed = Long.parseLong("-616941299922450565");
 	
@@ -346,7 +349,7 @@ public class IOTests extends TestCase{
 		Client c2 = wrap.startClient("Inet2");
 		c2.connect(ip);
 		
-		h.addRole(BasicRoles.MassMurderer());
+		h.addRole(BasicRoles.MassMurderer(), "Neutrals");
 		h.addRandomRole();
 		h.addRandomRole();
 		h.addRandomRole();
@@ -428,22 +431,28 @@ public class IOTests extends TestCase{
 	
 	
 	public void testSinglePlayer(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 		//long seed = new Random().nextLong();
-		long seed = Long.parseLong("4029469715490559274");
+		long seed = Long.parseLong("-6820543501750039764");
 		System.out.println(seed);
 		
 		Host h = wrap.startHost(seed);
-		h.addRole(BasicRoles.MassMurderer());
+		h.addRole(BasicRoles.MassMurderer(), "Neutrals");
+		NActivity na = (NActivity) h.getEnvironment().getActive();
+		assertEquals(1, na.ns.local.getAllRoles().size());
 		
 		h.newComputer();
-		h.addRole(BasicRoles.Citizen());
+		h.addRole(BasicRoles.Citizen(), Town);
+		assertEquals(2, na.ns.local.getAllRoles().size());
 		
 		
-		for (int i = 0; i < 30; i++){
+		for (int i = 0; i < 1; i++){
 			h.newComputer();
 			h.addRandomRole();
 		}
+		
+		assertEquals(3, na.ns.local.getAllRoles().size());
+		
 		
 		h.clickStart(seed);
 	
@@ -460,7 +469,7 @@ public class IOTests extends TestCase{
 
 	
 	public void testTexting(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 		long seed = new Random().nextLong();
 		//System.out.println(seed);
 		
@@ -470,9 +479,9 @@ public class IOTests extends TestCase{
 		TextClient t  = wrap.startTexter("text", "5", h.getEnvironment());
 		TextClient t2 = wrap.startTexter("text2", "6", h.getEnvironment());
 		
-		h.addRole(BasicRoles.Escort());
-		h.addRole(BasicRoles.Consort());
-		h.addRole(BasicRoles.SerialKiller());
+		h.addRole(BasicRoles.Escort(), Town);
+		h.addRole(BasicRoles.Consort(), Mafia);
+		h.addRole(BasicRoles.SerialKiller(), "Neutrals");
 		
 		h.clickStart(seed);
 		
@@ -488,7 +497,7 @@ public class IOTests extends TestCase{
 		t2Con.skipVote(sk);
 		tCon.skipVote(con);
 		
-		assertTrue(n.isNight());
+		assertTrue(h.getNarrator().isNight());
 		hCon.endNight(esc);
 		t2Con.endNight(sk);
 		tCon.endNight(con);
@@ -498,18 +507,19 @@ public class IOTests extends TestCase{
 		hCon.vote(esc, con);
 		tCon.vote(con, esc);
 		
-		tCon.setNightTarget(con, sk, con.getRole().getKeyWord());
+		tCon.setNightTarget(con, sk, Blocker.BLOCK);
 		t2Con.endNight(sk);
 		tCon.endNight(con);
 		
-		assertFalse(n.isInProgress());
+		assertFalse(h.getNarrator().isInProgress());
 		
 		//wrap.close();
 	}
 
+	public static final String Town = "Town", Mafia = "Mafia", Yakuza = "Yakuza", Randoms = "Randoms", Neutrals = "Neutrals";			
 		
 	public void testDoubleClient(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 		long seed = new Random().nextLong();
 		//System.out.println(seed);
 		
@@ -520,14 +530,14 @@ public class IOTests extends TestCase{
 		
 		
 		
-		h.addRole(BasicRoles.Detective());
-		h.addRole(RandomRole.MafiaRandom());
+		h.addRole(BasicRoles.Detective(), Town);
+		h.addRole(RandomRole.MafiaRandom(), "Randoms");
 		
 
 		Client c3 = wrap.startClient("C3");
 		
-		h.addRole(RandomRole.YakuzaRandom());
-		h.addRole(BasicRoles.Jester());
+		h.addRole(RandomRole.YakuzaRandom(), Randoms);
+		h.addRole(BasicRoles.Jester(), "Neutrals");
 		
 		h.dayStart();
 		
@@ -570,7 +580,7 @@ public class IOTests extends TestCase{
 
 		con1.setNightTarget(maf, maf, Team.SEND);
 		con3.endNight(jester);
-		con1.removeNightTarget(maf, Team.SEND);
+		con1.cancelNightTarget(maf, maf, Team.SEND);
 		con1.setNightTarget(maf, maf, Team.SEND);
 		con2.endNight(yak);
 		con1.setNightTarget(maf, maf, Team.SEND);
@@ -620,8 +630,13 @@ public class IOTests extends TestCase{
 		wrap.close();
 	}
 	
+	private ActivityCreateGame getACG(Interacter i){
+		Environment e = i.getEnvironment();
+		return (ActivityCreateGame) e.getActive();
+	}
+	
 	public void testBrainTexters(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 		
 		long seed = new Random().nextLong();
 		System.out.println(seed);
@@ -633,9 +648,17 @@ public class IOTests extends TestCase{
 			if(i != 0)
 				h.addRandomRole();
 		}
-		h.addRole(BasicRoles.Veteran());
-		h.addRole(RandomRole.YakuzaRandom());
+		
+		ActivityCreateGame ac = getACG(h);
+		
+		assertEquals(19, ac.ns.local.getAllRoles().size());
+		h.addRole(BasicRoles.Veteran(), Town);
+		assertEquals(20, ac.ns.local.getAllRoles().size());
+		h.addRole(RandomRole.YakuzaRandom(), Randoms);
+		assertEquals(21, ac.ns.local.getAllRoles().size());
+		
 		h.clickStart(seed);
+		
 		
 		wrap.startBrain();
 		while(h.getNarrator().isInProgress()){
@@ -645,7 +668,7 @@ public class IOTests extends TestCase{
 	}
 	
 	public void testSingleClientBrain(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 		
 		long seed = new Random().nextLong();
 		//long seed = Long.parseLong("1446272076855549240");
@@ -658,8 +681,8 @@ public class IOTests extends TestCase{
 		
 		h.addRandomRole();
 		h.addRandomRole();
-		h.addRole(BasicRoles.SerialKiller());
-		h.addRole(BasicRoles.Lookout());
+		h.addRole(BasicRoles.SerialKiller(), Neutrals);
+		h.addRole(BasicRoles.Lookout(), Town);
 		
 		h.clickStart(seed);
 		
@@ -673,7 +696,7 @@ public class IOTests extends TestCase{
 	}
 	
 	public void testSingleClientWithHostSubBrain(){
-		IOWrapper wrap = new IOWrapper(this);
+		IOWrapper wrap = new IOWrapper();
 		
 		long seed = new Random().nextLong();
 		//long seed = Long.parseLong("2525295728080531086");
@@ -701,9 +724,9 @@ public class IOTests extends TestCase{
 		h.addRandomRole();
 		wrap.startTexter("Tb1", "42223", h.getEnvironment());
 		h.addRandomRole();
-		h.addRole(BasicRoles.Jester());
-		h.addRole(BasicRoles.SerialKiller());
-		h.addRole(BasicRoles.Lookout());
+		h.addRole(BasicRoles.Jester(), Neutrals);
+		h.addRole(BasicRoles.SerialKiller(), Neutrals);
+		h.addRole(BasicRoles.Lookout(), Town);
 		
 		h.clickStart(seed);
 		
@@ -743,19 +766,5 @@ public class IOTests extends TestCase{
 		assertEquals(targetName, copyName);
 	}*/
 	
-	protected Narrator packageTest(){
-		Board b = new Board(n);
-		b.writeToBox();
-		
-		Narrator narrator = null;
-		try{
-			narrator = b.getFromBox();
-		}catch(NullPointerException|NumberFormatException|IllegalActionException e){
-			e.printStackTrace();
-		}finally{
-			b.finish();
-		}
-		assertEquals(n, narrator);
-		return narrator;
-	}
+	
 }

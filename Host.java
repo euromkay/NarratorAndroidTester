@@ -1,8 +1,5 @@
 package iowrapper;
 
-import java.util.Arrays;
-import java.util.Random;
-
 import android.CommunicatorPhone;
 import android.GUIController;
 import android.alerts.NamePrompt;
@@ -16,7 +13,7 @@ import android.setup.SetupManager;
 import android.setup.SetupScreenController;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -25,7 +22,7 @@ import shared.ai.Computer;
 import shared.logic.Player;
 import shared.logic.PlayerList;
 import shared.logic.exceptions.IllegalGameSettingsException;
-import shared.logic.support.Constants;
+import shared.logic.support.Random;
 import shared.logic.support.RoleTemplate;
 import voss.narrator.R;
 
@@ -39,7 +36,7 @@ public class Host extends Interacter{
 	
 	public void clickHost(){
 		ActivityHome aH = (ActivityHome) e.getActive();
-		aH.onClick(new View(R.id.home_host));
+		clickButton(R.id.home_host);
 	}
 
 	public void clickNameHost() {
@@ -72,10 +69,14 @@ public class Host extends Interacter{
 		return !sh.isLive();
 	}
 	
-	public void clickStart(long seed) {
+	public void clickStart(){
+		clickStart(null);
+	}
+	public void clickStart(Long seed) {
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
-		ac.getManager().ns.local.setSeed(seed);
-		ac.onClick(new View(R.id.roles_startGame));
+		if(seed != null)
+			ac.getManager().ns.local.setSeed(seed);
+		((Button)ac.findViewById(R.id.roles_startGame)).click();
 		
 		if(!getNarrator().isInProgress()){
 			throw new IllegalGameSettingsException("Probably caused because roles were messed up.");
@@ -87,45 +88,24 @@ public class Host extends Interacter{
 		}
 	}
 
-	
-
-	public void addRole(RoleTemplate randomRole) {
+	public void addRole(RoleTemplate role, String factionName) {
 
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
+
+		clickListing(ac.cataLV, factionName);
+		clickListing(ac.rolesLV, role.getName());
+			
 		
-		String color = randomRole.getColor();
-		AdapterView<?> v = new AdapterView(R.id.roles_categories_LV);
-		AdapterView<?> v2 = new AdapterView(R.id.roles_bottomLV);
-		int id;
-		if(randomRole.isRandom()){
-			ac.onItemClick(v, null, ActivityCreateGame.RANDOM, 0);
-			id = R.array.roles_randomRoles;
-		}else if(color == Constants.A_TOWN){
-			ac.onItemClick(v, null, ActivityCreateGame.TOWN, 0);
-			id = R.array.roles_townRoles;
-		}else if(color == Constants.A_MAFIA){
-			ac.onItemClick(v, null, ActivityCreateGame.MAFIA, 0);
-			id = R.array.roles_mafiaRoles;
-		}else if(color == Constants.A_YAKUZA){
-			ac.onItemClick(v, null, ActivityCreateGame.YAKUZA, 0);
-			id = R.array.roles_mafiaRoles;
-		}else{
-			ac.onItemClick(v, null, ActivityCreateGame.NEUTRAL, 0);
-			id = R.array.roles_neutralRoles;
-		}	
 		
-		String[] array = ac.getResources().getStringArray(id);
-		int click = Arrays.asList(array).indexOf(randomRole.getName());
-		ac.onItemClick(v2, null, click, id);
 		
 		Interacter i;
 		while((i = ws.missingRoles(getNarrator().getAllRoles().size())) != null){
-			Log.m("Host", "waiting for " + i.getName() + " to add " + randomRole.getName());
+			Log.m("Host", "waiting for " + i.getName() + " to add " + role.getName());
 		}
 	}
 
 	public void addRandomRole() {
-		addRole(SetupManager.getRandomRole(rand));
+		addRole(SetupManager.getRandomRole(rand), "Randoms");
 	}
 
 	public GUIController getController() {
@@ -149,6 +129,7 @@ public class Host extends Interacter{
 	public void newComputer() {
 
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
+		clickButton(R.id.roles_show_Players);
 		ac.onClick(new View(R.id.roles_show_Players));
 		
 		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().get("playerlist");
@@ -172,18 +153,41 @@ public class Host extends Interacter{
 		popUp.dismiss();
 		
 	}
+	
+	public void nightStart(){
+		ActivityCreateGame ac = (ActivityCreateGame) getEnvironment().getActive();
+		clickListing(ac.cataLV, "Randoms");
+		SetupScreenController sc = ac.getManager().screenController;
+		
+		CheckBox cb = sc.cBox[0];
+		if(!cb.isChecked())
+			return;
+		cb.toggle();
+	}
 
 	public void dayStart() {
 		ActivityCreateGame ac = (ActivityCreateGame) getEnvironment().getActive();
-		ac.onItemClick(ac.cataLV, null, ActivityCreateGame.RANDOM, 0);
+		clickListing(ac.cataLV, "Randoms");
 		SetupScreenController sc = ac.getManager().screenController;
+		
 		CheckBox cb = sc.cBox[0];
 		if(cb.isChecked())
 			return;
-		cb.setChecked(true);
-		sc.onCheckedChanged(cb, false);//false is unused
-			
-			
+		cb.toggle();
+	}
+
+	public void setAllComputers() {
+		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
+		ac.onClick(new View(R.id.roles_show_Players));
+		
+		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().get("playerlist");
+		
+		EditText et = (EditText) popUp.mainView.findViewById(R.id.addPlayerContent);
+		et.setText(PlayerPopUp.COMPUTER_COMMAND);
+		
+		Button addButton = (Button) popUp.mainView.findViewById(R.id.addPlayerConfirm);
+		addButton.click();
+		
 	}
 
 	
