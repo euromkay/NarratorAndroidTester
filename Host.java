@@ -16,7 +16,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.wifi.SocketHost;
 import shared.ai.Computer;
 import shared.logic.Player;
@@ -35,7 +34,6 @@ public class Host extends Interacter{
 	}
 	
 	public void clickHost(){
-		ActivityHome aH = (ActivityHome) e.getActive();
 		clickButton(R.id.home_host);
 	}
 
@@ -148,8 +146,7 @@ public class Host extends Interacter{
 				break;
 			}
 		}
-		popUp.onItemClick(null, new TextView(0), popUp.players.indexOf(x), 0);
-		
+		popUp.lv.click(popUp.players.indexOf(x));		
 		popUp.dismiss();
 		
 	}

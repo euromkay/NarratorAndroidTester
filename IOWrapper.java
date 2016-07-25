@@ -59,8 +59,10 @@ public class IOWrapper {
 		e.addView(R.id.day_horizontalShimmy);
 		e.addView(R.id.create_info_wrapper);
 		e.addView(R.id.create_chatHolder);
+		e.addView(R.layout.create_team_builder_layout);
 		
 		e.addTextView(R.id.home_join);
+		e.addTextView(R.id.create_info_description);
 		e.addButton(R.id.home_host);
 		e.addTextView(R.id.home_login_signup);
 		e.addTextView(R.id.home_tutorial);
@@ -78,13 +80,14 @@ public class IOWrapper {
 		e.addListView(R.id.day_actionList);
 		
 		e.addTextView(R.id.roles_categories_title, R.id.day_chatTV, R.id.day_roleLabel, R.id.day_alliesLabel);
-		e.addTextView(R.id.roles_bottomLV_title);
+		e.addTextView(R.id.roles_bottomLV_title, R.id.newTeam_previewText);
 		e.addTextView(R.id.day_membersLabel, R.id.day_title);
 		e.addTextView(R.id.day_commandsLabel, R.id.day_rolesList_label);
 		e.addTextView(R.id.roles_rightLV_title, R.id.create_rulesTV1, R.id.create_rulesTV2);
 		e.addTextView(R.id.roles_hint_title);
 		e.addTextView(R.id.day_currentPlayerTV, R.id.day_role_info);
 		
+		e.addButton(R.id.create_createTeamButton);
 		e.addButton(R.id.create_toChat);
 		e.addButton(R.id.create_chatButton);
 		e.addButton(R.id.roles_show_Players);

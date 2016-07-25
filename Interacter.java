@@ -57,17 +57,20 @@ public abstract class Interacter {
 		((ActivityDay)getEnvironment().getActive()).onDoubleTap();
 	}
 	
-	protected void clickListing(ListView lv, String name){
+	protected void clickFaction(String name){
 		ActivityCreateGame ac = (ActivityCreateGame) getEnvironment().getActive();
+		clickListing(ac.cataLV, name);
+	}
+	protected void clickListing(ListView lv, String name){
 		ListingAdapter list = (ListingAdapter) lv.adapter;
 		
 		int position = list.data.indexOf(name);
-		ac.onItemClick(lv, null, position, 0);
+		lv.click(position);
 	}
 	
 	public HostSub newPlayer(String name) {
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
-		ac.onClick(new View(R.id.roles_show_Players));
+		this.clickButton(R.id.roles_show_Players);
 		
 		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().get("playerlist");
 		EditText et = (EditText) popUp.mainView.findViewById(R.id.addPlayerContent);
