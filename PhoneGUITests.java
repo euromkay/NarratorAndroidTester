@@ -2,7 +2,9 @@ package iowrapper;
 
 import android.GUIController;
 import android.alerts.TeamBuilder;
+import android.alerts.TeamEditor;
 import android.graphics.Color;
+import android.screens.ListingAdapter;
 import android.setup.ActivityCreateGame;
 import android.setup.SetupScreenController;
 import android.view.View;
@@ -13,6 +15,7 @@ import junit.framework.TestCase;
 import shared.ai.Computer;
 import shared.logic.Player;
 import shared.logic.PlayerList;
+import shared.logic.Team;
 import shared.logic.exceptions.PlayerTargetingException;
 import shared.logic.support.Constants;
 import shared.logic.support.FactionManager;
@@ -159,6 +162,18 @@ public class PhoneGUITests extends TestCase{
 		assertTrue(h.getNarrator().getAllRoles().isEmpty());
 	}
 
+	public void testNoFactionSelected(){
+		IOWrapper wrap = new IOWrapper();
+		Host h = wrap.startHost();
+		
+		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
+		assertEquals(ac.rolesLV.getVisibility(), View.GONE);
+		assertEquals(ac.findViewById(R.id.create_info_wrapper).getVisibility(), View.GONE);
+		h.clickFaction("Town");
+		assertEquals(ac.findViewById(R.id.create_info_wrapper).getVisibility(), View.VISIBLE);
+		assertEquals(ac.rolesLV.getVisibility(), View.VISIBLE);
+	}
+	
 	public void testNewTeamButton(){
 		IOWrapper wrap = new IOWrapper();
 		Host h = wrap.startHost();
@@ -170,35 +185,144 @@ public class PhoneGUITests extends TestCase{
 		tb.nameInput.setText("Bro");
 		tb.colorInput.setText("3g4");
 		assertEquals(tb.preview.getText().toString(), "Bro");
-		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#FFF"));
+		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#FFFFFF"));
 		
 		tb.colorInput.setText("3f4");
-		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#3F4"));
+		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#33FF44"));
 		
 		tb.colorInput.setText("#44444");
 		((Button) tb.mainView.findViewById(R.id.newTeam_submit)).click();
-		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#F00"));
+		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#FF0000"));
 		assertEquals(tb.preview.getText().toString(), TeamBuilder.RGB_ERROR_CODE);
 		
 		tb.nameInput.setText("Town");
 		tb.colorInput.setText("0FF");
 		((Button) tb.mainView.findViewById(R.id.newTeam_submit)).click();
-		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#F00"));
+		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#FF0000"));
 		assertEquals(tb.preview.getText().toString(), FactionManager.TEAM_TAKEN);
 		
 		tb.nameInput.setText("Bro");
 		tb.colorInput.setText(Constants.A_ARSONIST);
 		((Button) tb.mainView.findViewById(R.id.newTeam_submit)).click();
-		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#F00"));
+		assertEquals(tb.preview.getCurrentTextColor(), Color.parseColor("#FF0000"));
 		assertEquals(tb.preview.getText().toString(), FactionManager.COLOR_TAKEN);
 		
 		tb.colorInput.setText("#FFE");
 		((Button) tb.mainView.findViewById(R.id.newTeam_submit)).click();
 		assertEquals(ac.ns.fManager.factions.size(), ac.cataLV.size());
+		
+		CheckBox cb = ac.getManager().screenController.cBox[0];
+		assertEquals("Has Faction kill", cb.getText());
 	}
 	
-	public void testDayNightLocal(){
+	public void testButtonVisibility(){
+		IOWrapper wrap = new IOWrapper();
+		Host h = wrap.startHost();
+		
+		trioInvisible(h);
+		h.clickFaction("Town");
+		trioInvisible(h);
+		h.clickFaction("Mafia");
+		trioInvisible(h);
+		h.clickFaction("Randoms");
+		trioInvisible(h);
+		h.addRole(BasicRoles.BusDriver(), "Town");
+		trioInvisible(h);
+		
+		h.addTeam("Bro", "#3FA");
+		
+		trioVisible(h);
+	}
+	
+	private void trioVisible(Host h){
+		testVisibility(h, View.VISIBLE);
+	}
+	
+	private void trioInvisible(Host h){
+		testVisibility(h, View.GONE);
+	}
+	
+	private void testVisibility(Host h, int visibility){
+		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
+		Button editAlly = (Button) ac.findViewById(R.id.create_editAlliesButton);
+		Button editRoles = (Button) ac.findViewById(R.id.create_editMembersButton);
+		Button deleteTeam = (Button) ac.findViewById(R.id.create_deleteTeamButton);
+		
+		assertEquals(editAlly.getVisibility(), visibility);
+		assertEquals(editRoles.getVisibility(), visibility);
+		assertEquals(deleteTeam.getVisibility(), visibility);
+	}
+	
+	public void testDeleteTeam(){
+		IOWrapper wrap = new IOWrapper();
+		Host h = wrap.startHost();
+		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
+
+		int size = ac.ns.fManager.factions.size();
+		
+		h.addTeam("Bro", "#3FA");
+		assertEquals(size + 1, ac.cataLV.size());
+		
+		h.clickButton(R.id.create_deleteTeamButton);
+		assertEquals(size, ac.cataLV.size());
+	}
+	
+	public void testEditAllies(){
+		IOWrapper wrap = new IOWrapper();
+		Host h = wrap.startHost();
+		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
+		
+		h.addTeam("Bro", "#3FA");
+		Team broTeam = ac.ns.local.getTeam("#33FFAA");
+		
+		h.clickButton(R.id.create_editAlliesButton);
+
+		TeamEditor te = (TeamEditor) ac.getFragmentManager().get("editTeam");
+		assertEquals(te.getDialog().getTitle(), TeamEditor.EDITING_ALLIES_TITLE);
+		
+		//test headers
+		assertEquals(((TextView) te.mainView.findViewById(R.id.editTeamTV1)).getText().toString(), TeamEditor.ALLIES_TITLE);
+		assertEquals(((TextView) te.mainView.findViewById(R.id.editTeamTV2)).getText().toString(), TeamEditor.ENEMIES_TITLE);
+		
+		ListingAdapter la = (ListingAdapter) te.l1.adapter;
+		String color = la.colors.get(0);
+		Team newEnemyTeam = ac.ns.local.getTeam(color);
+		
+		assertFalse(newEnemyTeam.isEnemy(broTeam));
+		te.l1.click(0);
+		assertTrue(newEnemyTeam.isEnemy(broTeam));
+		
+		te.l2.click(0);
+		assertFalse(newEnemyTeam.isEnemy(broTeam));
+	}
+	
+	public void testEditRoles(){
+		IOWrapper wrap = new IOWrapper();
+		Host h = wrap.startHost();
+		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
+		
+		h.addTeam("Bro", "#3FA");
+		h.clickButton(R.id.create_editMembersButton);
+
+		TeamEditor te = (TeamEditor) ac.getFragmentManager().get("editTeam");
+		assertEquals(te.getDialog().getTitle(), TeamEditor.EDITING_ROLES_TITLE);
+		
+		//test headers
+		assertEquals(((TextView) te.mainView.findViewById(R.id.editTeamTV1)).getText().toString(), TeamEditor.AVAILABLE_ROLES_TITLE);
+		assertEquals(((TextView) te.mainView.findViewById(R.id.editTeamTV2)).getText().toString(), TeamEditor.BLACKLISTED_ROLES_TITLE);
+		
+		ListingAdapter la2 = (ListingAdapter) te.l2.adapter;
+		ListingAdapter la1 = (ListingAdapter) te.l1.adapter;
+		int posOfBD = la2.data.indexOf(BasicRoles.BUS_DRIVER);
+		assertFalse(la1.data.contains(BasicRoles.BUS_DRIVER));
+		assertTrue(la2.data.contains(BasicRoles.BUS_DRIVER));
+		
+		te.l2.click(posOfBD);
+
+		la2 = (ListingAdapter) te.l2.adapter;
+		la1 = (ListingAdapter) te.l1.adapter;
+		assertFalse(la2.data.contains(BasicRoles.BUS_DRIVER));
+		assertTrue(la1.data.contains(BasicRoles.BUS_DRIVER));
 		
 	}
-	
 }

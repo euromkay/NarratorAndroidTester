@@ -39,7 +39,10 @@ public abstract class Interacter {
 		clickButton(R.id.home_join);
 	}
 	public void clickButton(int id){
-		((Button) getEnvironment().getActive().findViewById(id)).click();
+		Button b = ((Button) getEnvironment().getActive().findViewById(id));
+		if(b.getVisibility() != View.VISIBLE)
+			throw new IllegalStateException("Button isn't visible");
+		b.click();
 	}
 	
 	public String name;

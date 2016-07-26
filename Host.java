@@ -5,6 +5,7 @@ import android.GUIController;
 import android.alerts.NamePrompt;
 import android.alerts.PhoneBookPopUp;
 import android.alerts.PlayerPopUp;
+import android.alerts.TeamBuilder;
 import android.app.Environment;
 import android.day.ActivityDay;
 import android.screens.ActivityHome;
@@ -184,6 +185,18 @@ public class Host extends Interacter{
 		
 		Button addButton = (Button) popUp.mainView.findViewById(R.id.addPlayerConfirm);
 		addButton.click();
+		
+	}
+
+	public void addTeam(String name, String color) {
+		ActivityCreateGame ac = (ActivityCreateGame) getEnvironment().getActive();
+		clickButton(R.id.create_createTeamButton);
+		TeamBuilder tb = (TeamBuilder) ac.getFragmentManager().get("newTeam");
+		
+		tb.nameInput.setText(name);
+		tb.colorInput.setText(color);
+		((Button) tb.mainView.findViewById(R.id.newTeam_submit)).click();
+		
 		
 	}
 
