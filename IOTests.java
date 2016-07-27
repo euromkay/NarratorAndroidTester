@@ -11,14 +11,12 @@ import android.setup.ActivityCreateGame;
 import android.util.Log;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import packaging.Board;
 import shared.ai.Computer;
 import shared.ai.Controller;
 import shared.logic.Narrator;
 import shared.logic.Player;
 import shared.logic.PlayerList;
 import shared.logic.Team;
-import shared.logic.exceptions.IllegalActionException;
 import shared.logic.exceptions.PlayerTargetingException;
 import shared.logic.templates.BasicRoles;
 import shared.roles.Blocker;
@@ -38,39 +36,39 @@ public class IOTests extends TestCase{
 	
 	public void testSingleHost(){
 		for (int j = 0; j < 10; j++){
-		IOWrapper wrap = new IOWrapper();
-		
-		//long seed = new Random().nextLong();
-		long seed = Long.parseLong("6563289330430437151");
-		System.out.println(seed);
-		Host h = wrap.startHost(seed);
-		
-		h.addRole(BasicRoles.MassMurderer(), "Neutrals");
-		h.addRole(BasicRoles.CultLeader(), "Neutrals");
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		h.addRandomRole();
-		
-		for (int i = 1; i <= 12; i++){
-			h.newPlayer(Computer.toLetter(i));
-		}
-		
-		h.clickStart(seed);
-		
-		wrap.startBrain();
-		while(h.getNarrator().isInProgress()){
-			wrap.doActions();
-		}
-		
-		wrap.close();
+			IOWrapper wrap = new IOWrapper();
+			
+			long seed = new Random().nextLong();
+			//long seed = Long.parseLong("6563289330430437151");
+			//System.out.println(seed);
+			Host h = wrap.startHost(seed);
+			
+			h.addRole(BasicRoles.MassMurderer(), "Neutrals");
+			h.addRole(BasicRoles.CultLeader(),   "Neutrals");
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			
+			for (int i = 1; i <= 12; i++){
+				h.newPlayer(Computer.toLetter(i));
+			}
+			
+			h.clickStart(seed);
+			
+			wrap.startBrain();
+			while(h.getNarrator().isInProgress()){
+				wrap.doActions();
+			}
+			
+			wrap.close();
 		}
 	}
 	
@@ -374,8 +372,6 @@ public class IOTests extends TestCase{
 		
 		checkEquality(n_host, n_client3, n_client1, n_client2 );
 		
-		
-		System.out.println("Started");
 		wrap.start();
 
 		n_host    = h.getNarrator();

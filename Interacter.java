@@ -1,9 +1,19 @@
 package iowrapper;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.NarratorService;
+import android.alerts.LoginAlert;
 import android.alerts.NamePrompt;
 import android.alerts.PlayerPopUp;
 import android.app.Environment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.day.ActivityDay;
 import android.screens.ActivityHome;
@@ -43,6 +53,48 @@ public abstract class Interacter {
 		if(b.getVisibility() != View.VISIBLE)
 			throw new IllegalStateException("Button isn't visible");
 		b.click();
+	}
+	
+	
+	public void login(int i){
+		JSONObject creds = getCredentials(i);
+		
+		clickButton(R.id.home_login_signup);
+		FragmentManager fm = getEnvironment().getActive().getFragmentManager();
+		LoginAlert lAlert = (LoginAlert) fm.get("logginer");
+		try {
+			lAlert.userET.setText(creds.getString("username"));
+			lAlert.pwET.setText(creds.getString("password"));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		((Button) lAlert.mainView.findViewById(R.id.login_loginButton)).click();
+	}
+	
+	public JSONObject getCredentials(int i){
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader("creds.txt"));
+		    StringBuilder sb = new StringBuilder();
+		    String line = br.readLine();
+
+		    while (line != null) {
+		        sb.append(line);
+		        sb.append(System.lineSeparator());
+		        line = br.readLine();
+		    }
+		    return new JSONArray(sb.toString()).getJSONObject(i);
+		    
+		}  catch (JSONException|IOException e){
+		} finally {
+			if(br != null)
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		}
+		return null;
 	}
 	
 	public String name;

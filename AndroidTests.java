@@ -10,6 +10,7 @@ public class AndroidTests {
 		TestSuite suite = new TestSuite(AndroidTests.class.getName());
 		
 		suite.addTestSuite(PhoneGUITests.class);
+		suite.addTestSuite(ServerTests.class);
 		
 		
 		return suite;

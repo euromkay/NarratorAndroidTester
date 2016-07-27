@@ -23,48 +23,56 @@ public class IOWrapper {
 		ws = new WrapSynchr();
 	}
 	
+	public Host initHost(){
+		Environment e = EnvironmentCreator();
+		rand = new Random();
+		setSeed(seed);
+		host = new Host(e, rand, ws);
+		ws.add(host);
+		interacters.add(host);
+		return host;
+	}
+	
 	private Brain brain;
 	private Host host;
 	private Random rand;
 	private Long seed;
 	
-	public Host startHost(){
-		return startHost(null);
+	public Host startHost(int i){
+		return startHost(null, i);
 	}
-	public Host startHost(Long seed){
-		Environment e = EnvironmentCreator();
-		this.seed = seed;
-		rand = new Random();
-		if(seed != null)
-			rand.setSeed(seed);
-		host = new Host(e, rand, ws);
-		ws.add(host);
-		interacters.add(host);
+	
+	public Host startHost(){
+		return startHost(null, -1);
+	}
+	public Host startHost(Long seed, int login){
+		initHost();
+		if(login >= 0)
+			host.login(login);
 		host.clickHost();
 		host.clickNameHost();
 		
-		//ios.n = host.getNarrator();
 		
 		return host;
 	}
 	
-	public void setSeed(long l){
-		rand.setSeed(l);
+	public void setSeed(Long l){
+		if(rand != null && l != null)
+			rand.setSeed(l);
 	}
 
 	private Environment EnvironmentCreator(){
 		Environment e = new Environment();
-		
 		
 		e.addView(R.id.day_horizontalShimmy);
 		e.addView(R.id.create_info_wrapper);
 		e.addView(R.id.create_chatHolder);
 		e.addView(R.layout.create_team_builder_layout);
 		
-		e.addTextView(R.id.home_join);
+		e.addButton(R.id.home_join);
 		e.addTextView(R.id.create_info_description);
 		e.addButton(R.id.home_host);
-		e.addTextView(R.id.home_login_signup);
+		e.addButton(R.id.home_login_signup);
 		e.addTextView(R.id.home_tutorial);
 		e.addTextView(R.id.home_currentGames, R.id.create_info_label);
 
