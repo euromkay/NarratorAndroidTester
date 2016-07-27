@@ -87,6 +87,7 @@ public class IOWrapper {
 		e.addTextView(R.id.roles_hint_title);
 		e.addTextView(R.id.day_currentPlayerTV, R.id.day_role_info);
 		
+		e.addButton(R.id.editTeamConfirm);
 		e.addButton(R.id.create_editAlliesButton);
 		e.addButton(R.id.create_editMembersButton);
 		e.addButton(R.id.create_deleteTeamButton);

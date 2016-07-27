@@ -22,6 +22,7 @@ import shared.logic.support.FactionManager;
 import shared.logic.support.Random;
 import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
+import shared.roles.Citizen;
 import shared.roles.Driver;
 import voss.narrator.R;
 
@@ -323,6 +324,37 @@ public class PhoneGUITests extends TestCase{
 		la1 = (ListingAdapter) te.l1.adapter;
 		assertFalse(la2.data.contains(BasicRoles.BUS_DRIVER));
 		assertTrue(la1.data.contains(BasicRoles.BUS_DRIVER));
-		
 	}
+	
+	public void testDeleteTeamPurgeRole(){
+		IOWrapper wrap = new IOWrapper();
+		Host h = wrap.startHost();
+		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
+		
+		h.addTeam("Bro", "#3FA");
+		h.clickButton(R.id.create_editMembersButton);
+		
+		TeamEditor te = (TeamEditor) ac.getFragmentManager().get("editTeam");
+		ListingAdapter la2 = (ListingAdapter) te.l2.adapter;
+		int posOfCit = la2.data.indexOf(Citizen.ROLE_NAME);
+		
+		te.l2.click(posOfCit);//get it? piece of poop
+		te.l2.click(0);
+		
+		h.clickButton(R.id.editTeamConfirm);
+		h.addRole(BasicRoles.Citizen().setColor("#33FFAA"), "Bro");
+		
+		h.clickFaction("Randoms");
+		ListingAdapter la = (ListingAdapter) ac.rolesLV.adapter;
+		int broIndex = la.data.indexOf("Bro Random");
+		ac.rolesLV.click(broIndex);
+		
+		assertEquals(2, ac.rolesListLV.size());
+		
+		h.clickFaction("Bro");
+		h.clickButton(R.id.create_deleteTeamButton);
+		
+		assertEquals(0, ac.rolesListLV.size());
+	}
+	//on deleting a team, the roles list should be purged completely
 }
