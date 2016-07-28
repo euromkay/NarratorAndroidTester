@@ -3,11 +3,15 @@ package iowrapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import android.app.Environment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.parse.Server;
 import android.screens.ActivityHome;
 import android.setup.ActivityCreateGame;
+import android.telephony.SmsManager;
 import android.util.Log;
 import shared.ai.Brain;
 import shared.logic.Narrator;
@@ -20,6 +24,9 @@ public class IOWrapper {
 
 	public WrapSynchr ws;
 	public IOWrapper(){
+		FirebaseAuth.Destroy();
+		Server.Destroy();
+		SmsManager.sms = null;
 		ws = new WrapSynchr();
 	}
 	
@@ -37,6 +44,10 @@ public class IOWrapper {
 	private Host host;
 	private Random rand;
 	private Long seed;
+	
+	public Host startHost(Long l){
+		return startHost(l, -1);
+	}
 	
 	public Host startHost(int i){
 		return startHost(null, i);
@@ -165,6 +176,7 @@ public class IOWrapper {
 		((ActivityCreateGame) host.e.getActive()).getManager().textAdder.onReceive(host.e.getActive(), intent);
 		TextClient i = new TextClient(number, e);
 		interacters.add(i);
+		
 		return i;
 		
 	}

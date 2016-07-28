@@ -1,8 +1,10 @@
 package iowrapper;
 
 import android.GUIController;
+import android.NActivity;
 import android.alerts.TeamBuilder;
 import android.alerts.TeamEditor;
+import android.day.ActivityDay;
 import android.graphics.Color;
 import android.screens.ListingAdapter;
 import android.setup.ActivityCreateGame;
@@ -31,6 +33,44 @@ public class PhoneGUITests extends TestCase{
 	
 	public PhoneGUITests(String name) {
 		super(name);
+	}
+	
+	public void testSingleHost(){
+		for (int j = 0; j < 1; j++){
+			IOWrapper wrap = new IOWrapper();
+			
+			long seed = new Random().nextLong();
+			//long seed = Long.parseLong("6563289330430437151");
+			//System.out.println(seed);
+			Host h = wrap.startHost(seed);
+			
+			h.addRole(BasicRoles.MassMurderer(), "Neutrals");
+			h.addRole(BasicRoles.CultLeader(),   "Neutrals");
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			h.addRandomRole();
+			
+			for (int i = 1; i <= 12; i++){
+				h.newPlayer(Computer.toLetter(i));
+			}
+			
+			h.clickStart(seed);
+			
+			wrap.startBrain();
+			while(h.getNarrator().isInProgress()){
+				wrap.doActions();
+			}
+			
+			wrap.close();
+		}
 	}
 	
 	public void testDriverAbilityTest(){
@@ -75,7 +115,42 @@ public class PhoneGUITests extends TestCase{
 		assertEquals(2, c.dScreen.actionList.size());
 	}
 	
+	public void testSinglePlayer(){
+		IOWrapper wrap = new IOWrapper();
+		//long seed = new Random().nextLong();
+		long seed = Long.parseLong("-6820543501750039764");
+		//System.out.println(seed);
+		
+		Host h = wrap.startHost(seed);
+		h.addRole(BasicRoles.MassMurderer(), "Neutrals");
+		NActivity na = (NActivity) h.getEnvironment().getActive();
+		assertEquals(1, na.ns.local.getAllRoles().size());
+		
+		h.newComputer();
+		h.addRole(BasicRoles.Citizen(), "Town");
+		assertEquals(2, na.ns.local.getAllRoles().size());
+		
+		
+		for (int i = 0; i < 1; i++){
+			h.newComputer();
+			h.addRandomRole();
+		}
+		
+		assertEquals(3, na.ns.local.getAllRoles().size());
+		
+		
+		h.clickStart(seed);
 	
+		wrap.startBrain();
+		
+		
+		ActivityDay ad = (ActivityDay) h.getEnvironment().getActive();
+		while(h.getNarrator().isInProgress() ){
+			ad.onDoubleTap();
+			wrap.doActions();
+		}
+		wrap.close();
+	}
 	
 	public void testDoubleClick(){
 		IOWrapper wrap = new IOWrapper();
@@ -356,5 +431,18 @@ public class PhoneGUITests extends TestCase{
 		
 		assertEquals(0, ac.rolesListLV.size());
 	}
-	//on deleting a team, the roles list should be purged completely
+	
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,14 +1,17 @@
 package iowrapper;
 
+import java.util.ArrayList;
+
 import android.app.Environment;
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
 import android.day.ActivityDay;
+import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.texting.CommunicatorText;
 import android.texting.PhoneNumber;
 import android.texting.TextController;
 import android.texting.TextInput;
+import android.util.Log;
 import shared.ai.Controller;
 import shared.logic.Player;
 import shared.logic.PlayerList;
@@ -27,16 +30,7 @@ public class TextClient extends Interacter{
 		TextInput ti = new TextInput(){
 			public void text(Player p, String message, boolean sync) {
 				Log.i(p.toString(), message);
-				Bundle b = new Bundle();
-				b.putString("message", message);
-				b.putString("number", number.toString());
-				
-
-				Intent i = new Intent();
-				i.setBundle(b);
-				
-				ActivityDay ad = (ActivityDay) e.getActive();
-				ad.intentReceiver.onReceive(null, i);
+				TextClient.this.text(message);
 			}
 			
 		};
@@ -55,6 +49,26 @@ public class TextClient extends Interacter{
 			}
 		}
 		return list;
+	}
+
+
+	public ArrayList<String> getMessages() {
+		return SmsManager.getDefault().records.get(number.toString());
+	}
+
+	
+	public void text(String message) {
+		Bundle b = new Bundle();
+		b.putString("message", message);
+		b.putString("number", number.toString());
+		
+
+		Intent i = new Intent();
+		i.setBundle(b);
+		
+		ActivityDay ad = (ActivityDay) e.getActive();
+		ad.intentReceiver.onReceive(null, i);
+		
 	}
 	
 	

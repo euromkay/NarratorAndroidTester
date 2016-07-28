@@ -11,7 +11,7 @@ public class AndroidTests {
 		
 		suite.addTestSuite(PhoneGUITests.class);
 		suite.addTestSuite(ServerTests.class);
-		
+		suite.addTestSuite(TextTests.class);
 		
 		return suite;
 	}

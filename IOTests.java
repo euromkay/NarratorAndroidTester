@@ -34,43 +34,7 @@ public class IOTests extends TestCase{
 		super(name);
 	}
 	
-	public void testSingleHost(){
-		for (int j = 0; j < 10; j++){
-			IOWrapper wrap = new IOWrapper();
-			
-			long seed = new Random().nextLong();
-			//long seed = Long.parseLong("6563289330430437151");
-			//System.out.println(seed);
-			Host h = wrap.startHost(seed);
-			
-			h.addRole(BasicRoles.MassMurderer(), "Neutrals");
-			h.addRole(BasicRoles.CultLeader(),   "Neutrals");
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			h.addRandomRole();
-			
-			for (int i = 1; i <= 12; i++){
-				h.newPlayer(Computer.toLetter(i));
-			}
-			
-			h.clickStart(seed);
-			
-			wrap.startBrain();
-			while(h.getNarrator().isInProgress()){
-				wrap.doActions();
-			}
-			
-			wrap.close();
-		}
-	}
+	
 	
 	public void testSingleConnection(){
 		IOWrapper wrap = new IOWrapper();
@@ -426,42 +390,7 @@ public class IOTests extends TestCase{
 	}
 	
 	
-	public void testSinglePlayer(){
-		IOWrapper wrap = new IOWrapper();
-		//long seed = new Random().nextLong();
-		long seed = Long.parseLong("-6820543501750039764");
-		System.out.println(seed);
-		
-		Host h = wrap.startHost(seed);
-		h.addRole(BasicRoles.MassMurderer(), "Neutrals");
-		NActivity na = (NActivity) h.getEnvironment().getActive();
-		assertEquals(1, na.ns.local.getAllRoles().size());
-		
-		h.newComputer();
-		h.addRole(BasicRoles.Citizen(), Town);
-		assertEquals(2, na.ns.local.getAllRoles().size());
-		
-		
-		for (int i = 0; i < 1; i++){
-			h.newComputer();
-			h.addRandomRole();
-		}
-		
-		assertEquals(3, na.ns.local.getAllRoles().size());
-		
-		
-		h.clickStart(seed);
 	
-		wrap.startBrain();
-		
-		
-		ActivityDay ad = (ActivityDay) h.getEnvironment().getActive();
-		while(h.getNarrator().isInProgress() ){
-			ad.onDoubleTap();
-			wrap.doActions();
-		}
-		wrap.close();
-	}
 
 	
 	public void testTexting(){

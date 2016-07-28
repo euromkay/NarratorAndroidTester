@@ -8,6 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import android.NarratorService;
 import android.alerts.LoginAlert;
 import android.alerts.NamePrompt;
@@ -57,7 +59,13 @@ public abstract class Interacter {
 	
 	
 	public void login(int i){
-		JSONObject creds = getCredentials(i);
+		JSONObject creds = null;
+		try {
+			creds = getCredentials(i);
+		} catch (JSONException e1) {
+			e1.printStackTrace();
+			return;
+		}
 		
 		clickButton(R.id.home_login_signup);
 		FragmentManager fm = getEnvironment().getActive().getFragmentManager();
@@ -69,9 +77,10 @@ public abstract class Interacter {
 			e.printStackTrace();
 		}
 		((Button) lAlert.mainView.findViewById(R.id.login_loginButton)).click();
+		this.name = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
 	}
 	
-	public JSONObject getCredentials(int i){
+	public static JSONArray getAllCreds(){
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader("creds.txt"));
@@ -83,7 +92,7 @@ public abstract class Interacter {
 		        sb.append(System.lineSeparator());
 		        line = br.readLine();
 		    }
-		    return new JSONArray(sb.toString()).getJSONObject(i);
+		    return new JSONArray(sb.toString());
 		    
 		}  catch (JSONException|IOException e){
 		} finally {
@@ -95,6 +104,10 @@ public abstract class Interacter {
 				}
 		}
 		return null;
+	}
+	
+	public static JSONObject getCredentials(int i) throws JSONException{
+		return getAllCreds().getJSONObject(i);
 	}
 	
 	public String name;
