@@ -1,18 +1,23 @@
 package iowrapper;
 
-import android.app.Environment;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
+import org.json.JSONArray;
+
 import android.GUIController;
-import voss.narrator.R;
+import android.JUtils;
+import android.NActivity;
 import android.alerts.IpPrompt;
 import android.alerts.NamePrompt;
+import android.app.Environment;
 import android.day.ActivityDay;
 import android.day.PlayerDrawerAdapter;
 import android.screens.ActivityHome;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 import android.wifi.SocketClient;
+import shared.logic.Narrator;
 import shared.logic.PlayerList;
+import voss.narrator.R;
 
 public class Client extends Interacter{
 
@@ -65,7 +70,16 @@ public class Client extends Interacter{
 		ActivityDay ad = (ActivityDay) e.getActive();
 		while(ad.playerMenu == null || ad.playerMenu.adapter == null)
 			Log.m("Client", "waiting for playerMenu to be created before giving out players");
-		return ((PlayerDrawerAdapter) ad.playerMenu.adapter).getPlayersInView();
+		JSONArray jArray = ((PlayerDrawerAdapter) ad.playerMenu.adapter).getPlayersInView();
+		if(((NActivity) e.getActive()).server.IsLoggedIn()){
+			return null;
+		}else{
+			Narrator n = ((NActivity) e.getActive()).ns.local;
+			PlayerList players = new PlayerList();
+			for(int i = 0; i < jArray.length(); i++)
+				players.add(n.getPlayerByName(JUtils.getString(jArray, i)));
+			return players;
+		}
 	}
 	
 	

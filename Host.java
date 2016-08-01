@@ -1,5 +1,8 @@
 package iowrapper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.CommunicatorPhone;
 import android.GUIController;
 import android.alerts.NamePrompt;
@@ -12,6 +15,7 @@ import android.screens.ActivityHome;
 import android.setup.ActivityCreateGame;
 import android.setup.SetupManager;
 import android.setup.SetupScreenController;
+import android.texting.StateObject;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -77,9 +81,7 @@ public class Host extends Interacter{
 			ac.getManager().ns.local.setSeed(seed);
 		((Button)ac.findViewById(R.id.roles_startGame)).click();
 		
-		if(!getNarrator().isInProgress()){
-			throw new IllegalGameSettingsException("Probably caused because roles were messed up.");
-		}
+		
 		
 		Interacter i;
 		while((i = ws.notOnActivityDayYet()) != null){
@@ -139,15 +141,15 @@ public class Host extends Interacter{
 		
 		popUp.onClick(new View(0));
 		
-		Player x = null;;
-		for (Player p: popUp.players){
-			
-			if(p.getName().equals(name)){
-				x = p;
-				break;
+		for(int i = 0; i < popUp.players.length(); i++){
+			try{
+				JSONObject jPlayer = popUp.players.getJSONObject(i);
+				if(jPlayer.getString(StateObject.playerName).equals(name))
+					popUp.lv.click(i);
+			}catch(JSONException e){
+				e.printStackTrace();
 			}
-		}
-		popUp.lv.click(popUp.players.indexOf(x));		
+		}	
 		popUp.dismiss();
 		
 	}

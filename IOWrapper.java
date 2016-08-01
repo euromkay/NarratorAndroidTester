@@ -5,10 +5,12 @@ import java.util.HashMap;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import android.NActivity;
+import android.app.Activity;
 import android.app.Environment;
+import android.app.Environment.EnvironmentListener;
 import android.content.Intent;
 import android.os.Bundle;
-import android.parse.Server;
 import android.screens.ActivityHome;
 import android.setup.ActivityCreateGame;
 import android.telephony.SmsManager;
@@ -24,16 +26,18 @@ public class IOWrapper {
 
 	public WrapSynchr ws;
 	public IOWrapper(){
-		FirebaseAuth.Destroy();
-		Server.Destroy();
 		SmsManager.sms = null;
 		ws = new WrapSynchr();
+		envs = new ArrayList<>();
 	}
 	
+	public ArrayList<Environment> envs;
 	public Host initHost(){
 		Environment e = EnvironmentCreator();
+		envs.add(e);
 		rand = new Random();
 		setSeed(seed);
+		FirebaseAuth.e = e;
 		host = new Host(e, rand, ws);
 		ws.add(host);
 		interacters.add(host);
@@ -73,15 +77,21 @@ public class IOWrapper {
 	}
 
 	private Environment EnvironmentCreator(){
-		Environment e = new Environment();
+		final Environment e = new Environment(new EnvironmentListener(){
+			public void onActivityChange(Activity a, Environment e){
+				NActivity na = (NActivity) a;
+				//na.server.Destroy();
+				FirebaseAuth.e = e;
+			}
+		});
 		
 		e.addView(R.id.day_horizontalShimmy);
 		e.addView(R.id.create_info_wrapper);
-		e.addView(R.id.create_chatHolder);
+		e.addScrollView(R.id.create_chatHolder);
 		e.addView(R.layout.create_team_builder_layout);
 		
 		e.addButton(R.id.home_join);
-		e.addTextView(R.id.create_info_description);
+		e.addTextView(R.id.create_info_description, R.id.create_chatTV);
 		e.addButton(R.id.home_host);
 		e.addButton(R.id.home_login_signup);
 		e.addTextView(R.id.home_tutorial);
@@ -138,16 +148,21 @@ public class IOWrapper {
 		return e;
 	}
 	
-	public Client startClient(String name) {
+	public Client initClient(){
 		Environment e = EnvironmentCreator();
-		
+		envs.add(e);
 		Client c = new Client(e, ws);
 		ws.add(c);
+		return c;
+	}
+	
+	public Client startClient(String name) {
+		Client c = initClient();
 		c.clickJoin();
 		c.name = name;
 		c.connect(host.getIP());
 		
-		ActivityHome ah = (ActivityHome) e.getActive();
+		ActivityHome ah = (ActivityHome) c.getEnvironment().getActive();
 		
 		while(ah.getFragmentManager().get("namePrompt") == null)
 			Log.m("Client (IOWrapper)", "waiting for connect to host by detecting nameprompt");;
