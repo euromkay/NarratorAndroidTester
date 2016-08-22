@@ -4,12 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.google.firebase.auth.FirebaseAuth;
 
+import android.NActivity;
 import android.NarratorService;
 import android.alerts.LoginAlert;
 import android.alerts.NamePrompt;
@@ -27,6 +24,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import json.JSONArray;
+import json.JSONException;
+import json.JSONObject;
 import shared.ai.Controller;
 import shared.logic.Narrator;
 import shared.logic.PlayerList;
@@ -69,7 +69,7 @@ public abstract class Interacter {
 		
 		clickButton(R.id.home_login_signup);
 		FragmentManager fm = getEnvironment().getActive().getFragmentManager();
-		LoginAlert lAlert = (LoginAlert) fm.get("logginer");
+		LoginAlert lAlert = (LoginAlert) fm.getFragment(null, "logginer");
 		try {
 			lAlert.userET.setText(creds.getString("username"));
 			lAlert.pwET.setText(creds.getString("password"));
@@ -95,6 +95,7 @@ public abstract class Interacter {
 		    return new JSONArray(sb.toString());
 		    
 		}  catch (JSONException|IOException e){
+			e.printStackTrace();
 		} finally {
 			if(br != null)
 				try {
@@ -114,7 +115,7 @@ public abstract class Interacter {
 	public void setName(String string) {
 		name = string;
 		ActivityHome aH = (ActivityHome) e.getActive();
-		NamePrompt np = (NamePrompt) aH.getFragmentManager().get("namePrompt");
+		NamePrompt np = (NamePrompt) aH.getFragmentManager().getFragment(null, "namePrompt");
 		
 		EditText et = (EditText) np.mainView.findViewById(R.id.home_nameET);
 		et.setText(string);
@@ -140,7 +141,7 @@ public abstract class Interacter {
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
 		this.clickButton(R.id.roles_show_Players);
 		
-		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().get("playerlist");
+		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().getFragment(null, "playerlist");
 		EditText et = (EditText) popUp.mainView.findViewById(R.id.addPlayerContent);
 		et.setText(name);
 		
@@ -181,5 +182,29 @@ public abstract class Interacter {
 	public Narrator getNarrator() {
 		NarratorService ns = (NarratorService) e.services.get(NarratorService.class);
 		return ns.local;
+	}
+	
+	public ActivityCreateGame getActivityCreateGame() {
+		return (ActivityCreateGame) getActivity();
+	}
+	
+	public NActivity getActivity() {
+		return (NActivity) getEnvironment().getActive();
+	}
+	
+	public void chat(String message) {
+		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
+		if(!ac.chatVisible())
+			clickButton(R.id.create_toChat);
+		EditText et = (EditText) ac.findViewById(R.id.create_chatET);
+		et.inputText(message);
+		clickButton(R.id.create_chatButton);
+		if(nSwitch != null)
+			nSwitch.consume();
+	}
+	
+	protected SwitchWrapper nSwitch;
+	public void setSwitch(SwitchWrapper nSwitch) {
+		this.nSwitch = nSwitch;
 	}
 }

@@ -1,8 +1,5 @@
 package iowrapper;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.CommunicatorPhone;
 import android.GUIController;
 import android.alerts.NamePrompt;
@@ -21,11 +18,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.wifi.SocketHost;
+import json.JSONException;
+import json.JSONObject;
 import shared.ai.Computer;
 import shared.logic.Player;
 import shared.logic.PlayerList;
-import shared.logic.exceptions.IllegalGameSettingsException;
 import shared.logic.support.Random;
 import shared.logic.support.RoleTemplate;
 import voss.narrator.R;
@@ -45,14 +42,14 @@ public class Host extends Interacter{
 	public void clickNameHost() {
 		ActivityHome aH = (ActivityHome) e.getActive();
 		
-		NamePrompt np = (NamePrompt) aH.getFragmentManager().get("namePrompt");
+		NamePrompt np = (NamePrompt) aH.getFragmentManager().getFragment(null, "namePrompt");
 		EditText et = (EditText) np.mainView.findViewById(R.id.home_nameET);
 		et.setText("Master");
 		super.setName("Master");
 		
 		np.posClick();
 		
-		PhoneBookPopUp pop = (PhoneBookPopUp) aH.getFragmentManager().get("phoneBookPopup");
+		PhoneBookPopUp pop = (PhoneBookPopUp) aH.getFragmentManager().getFragment(null, "phoneBookPopup");
 		pop.onClick(null);
 		
 		
@@ -63,14 +60,6 @@ public class Host extends Interacter{
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
 		return ac.rolesLeftTV.getText();
 	}
-
-	public boolean notBroadcasting(){
-		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
-		SocketHost sh = (SocketHost) ac.getManager().ns.socketHost;
-		if(sh == null)
-			return true;
-		return !sh.isLive();
-	}
 	
 	public void clickStart(){
 		clickStart(null);
@@ -79,6 +68,8 @@ public class Host extends Interacter{
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
 		if(seed != null)
 			ac.getManager().ns.local.setSeed(seed);
+		else
+			ac.getManager().ns.local.setSeed(0);
 		((Button)ac.findViewById(R.id.roles_startGame)).click();
 		
 		
@@ -133,7 +124,7 @@ public class Host extends Interacter{
 		clickButton(R.id.roles_show_Players);
 		ac.onClick(new View(R.id.roles_show_Players));
 		
-		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().get("playerlist");
+		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().getFragment(null, "playerlist");
 		popUp.onCreateView(ac.getLayoutInflater(), null, null);
 		EditText et = (EditText) popUp.mainView.findViewById(R.id.addPlayerContent);
 		String name = Computer.toLetter(ac.getNarrator().getPlayerCount()+1);
@@ -180,7 +171,7 @@ public class Host extends Interacter{
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
 		ac.onClick(new View(R.id.roles_show_Players));
 		
-		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().get("playerlist");
+		PlayerPopUp popUp = (PlayerPopUp) ac.getFragmentManager().getFragment(null, "playerlist");
 		
 		EditText et = (EditText) popUp.mainView.findViewById(R.id.addPlayerContent);
 		et.setText(PlayerPopUp.COMPUTER_COMMAND);
@@ -193,14 +184,24 @@ public class Host extends Interacter{
 	public void addTeam(String name, String color) {
 		ActivityCreateGame ac = (ActivityCreateGame) getEnvironment().getActive();
 		clickButton(R.id.create_createTeamButton);
-		TeamBuilder tb = (TeamBuilder) ac.getFragmentManager().get("newTeam");
+		TeamBuilder tb = (TeamBuilder) ac.getFragmentManager().getFragment(null, "newTeam");
 		
 		tb.nameInput.setText(name);
 		tb.colorInput.setText(color);
 		((Button) tb.mainView.findViewById(R.id.newTeam_submit)).click();
+		tb.dismiss();
 		
-		
+		if(nSwitch != null)
+			nSwitch.consume();
 	}
+
+	public void hostGame() {
+		clickButton(R.id.home_host);
+		if(nSwitch != null)
+			nSwitch.consume(2);
+	}
+
+	
 
 	
 }

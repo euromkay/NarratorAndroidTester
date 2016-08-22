@@ -1,10 +1,12 @@
 package iowrapper;
 
+import java.util.ArrayList;
+
 import android.GUIController;
 import android.NActivity;
 import android.alerts.TeamBuilder;
 import android.alerts.TeamEditor;
-import android.day.ActivityDay;
+import android.day.DayScreenController;
 import android.graphics.Color;
 import android.screens.ListingAdapter;
 import android.setup.ActivityCreateGame;
@@ -96,7 +98,11 @@ public class PhoneGUITests extends TestCase{
 		Player p1 = pl.getFirst(), p2 = pl.get(1);
 		
 		c.selectSlave(p1);
+		assertTrue(c.dScreen.manager.dScreenController.playerSelected());
+		
 		assertTrue(c.dScreen.playerLabelTV.getText().equals(p1.getName()));
+		String commandText = c.dScreen.commandTV.getText().toString();
+		assertFalse(commandText.equals(DayScreenController.HAVENT_ENDED_NIGHT_TEXT));
 		
 		
 		c.swipeAbilityPanel(Driver.TEXT1);
@@ -107,7 +113,7 @@ public class PhoneGUITests extends TestCase{
 
 		c.swipeAbilityPanel(Driver.TEXT2);
 		assertEquals(2, c.dScreen.actionList.size());
-		assertFalse(p2.in(c.dScreen.actionList));
+		assertFalse(c.dScreen.actionList.contains(p2.getName()));
 		try{
 			c.setNightTarget(p1, p2, Driver.TEXT2);
 			fail();
@@ -115,10 +121,39 @@ public class PhoneGUITests extends TestCase{
 		assertEquals(2, c.dScreen.actionList.size());
 	}
 	
+	public void testSkipDayText(){
+		IOWrapper wrap = new IOWrapper();
+		Host h = wrap.startHost();
+		h.newPlayer("p1");
+		h.newPlayer("p2");
+		
+		h.addRole(BasicRoles.MassMurderer(), "Neutrals");
+		h.addRole(BasicRoles.Citizen(), "Town");
+		h.addRole(BasicRoles.Citizen(), "Town");
+		
+		h.dayStart();
+		h.clickStart();
+		
+		GUIController g = h.getController();
+		
+		Player first = h.getPlayers().getFirst();
+		g.selectSlave(first);
+		g.actionPanelClick();
+		
+		ArrayList<String> actionList = g.dScreen.actionList;
+		assertEquals(3, actionList.size());
+		assertFalse(actionList.contains(first.getName()));
+		
+		g.skipVote(first);
+		assertEquals(1, h.getNarrator().Skipper.getVoteCount());
+	}
+	
+	
+	
 	public void testSinglePlayer(){
 		IOWrapper wrap = new IOWrapper();
-		//long seed = new Random().nextLong();
-		long seed = Long.parseLong("-6820543501750039764");
+		long seed = new Random().nextLong();
+		//long seed = Long.parseLong("-5740312402763706335");
 		//System.out.println(seed);
 		
 		Host h = wrap.startHost(seed);
@@ -144,9 +179,8 @@ public class PhoneGUITests extends TestCase{
 		wrap.startBrain();
 		
 		
-		ActivityDay ad = (ActivityDay) h.getEnvironment().getActive();
 		while(h.getNarrator().isInProgress() ){
-			ad.onDoubleTap();
+			//ad.onDoubleTap();
 			wrap.doActions();
 		}
 		wrap.close();
@@ -256,7 +290,7 @@ public class PhoneGUITests extends TestCase{
 		
 		ActivityCreateGame ac = (ActivityCreateGame) h.getEnvironment().getActive();
 		h.clickButton(R.id.create_createTeamButton);
-		TeamBuilder tb = (TeamBuilder) ac.getFragmentManager().get("newTeam");
+		TeamBuilder tb = (TeamBuilder) ac.getFragmentManager().getFragment(null, "newTeam");
 		
 		tb.nameInput.setText("Bro");
 		tb.colorInput.setText("3g4");
@@ -353,7 +387,7 @@ public class PhoneGUITests extends TestCase{
 		
 		h.clickButton(R.id.create_editAlliesButton);
 
-		TeamEditor te = (TeamEditor) ac.getFragmentManager().get("editTeam");
+		TeamEditor te = (TeamEditor) ac.getFragmentManager().getFragment(null, "editTeam");
 		assertEquals(te.getDialog().getTitle(), TeamEditor.EDITING_ALLIES_TITLE);
 		
 		//test headers
@@ -380,7 +414,7 @@ public class PhoneGUITests extends TestCase{
 		h.addTeam("Bro", "#3FA");
 		h.clickButton(R.id.create_editMembersButton);
 
-		TeamEditor te = (TeamEditor) ac.getFragmentManager().get("editTeam");
+		TeamEditor te = (TeamEditor) ac.getFragmentManager().getFragment(null, "editTeam");
 		assertEquals(te.getDialog().getTitle(), TeamEditor.EDITING_ROLES_TITLE);
 		
 		//test headers
@@ -409,7 +443,7 @@ public class PhoneGUITests extends TestCase{
 		h.addTeam("Bro", "#3FA");
 		h.clickButton(R.id.create_editMembersButton);
 		
-		TeamEditor te = (TeamEditor) ac.getFragmentManager().get("editTeam");
+		TeamEditor te = (TeamEditor) ac.getFragmentManager().getFragment(null, "editTeam");
 		ListingAdapter la2 = (ListingAdapter) te.l2.adapter;
 		int posOfCit = la2.data.indexOf(Citizen.ROLE_NAME);
 		

@@ -4,14 +4,12 @@ import java.util.Random;
 
 import android.CommunicatorPhone;
 import android.GUIController;
-import android.NActivity;
 import android.app.Environment;
 import android.day.ActivityDay;
 import android.setup.ActivityCreateGame;
 import android.util.Log;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import shared.ai.Computer;
 import shared.ai.Controller;
 import shared.logic.Narrator;
 import shared.logic.Player;
@@ -498,10 +496,6 @@ public class IOTests extends TestCase{
 		assertTrue(c1.getNarrator().isNight());
 		assertTrue(c2.getNarrator().isNight());
 		assertTrue(c3.getNarrator().isNight());
-		
-		assertFalse(((ActivityDay)c1.getEnvironment().getActive()).manager.ns.socketClient.getChat().isClosed());
-		assertFalse(((ActivityDay)c2.getEnvironment().getActive()).manager.ns.socketClient.getChat().isClosed());
-		assertFalse(((ActivityDay)c3.getEnvironment().getActive()).manager.ns.socketClient.getChat().isClosed());
 
 		con1.setNightTarget(maf, maf, Team.SEND);
 		con3.endNight(jester);

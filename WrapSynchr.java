@@ -3,8 +3,6 @@ package iowrapper;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 
-import android.day.ActivityDay;
-
 public class WrapSynchr {
 
 	ArrayList<Interacter> interacters = new ArrayList<>();
@@ -36,7 +34,7 @@ public class WrapSynchr {
 	public Interacter notOnActivityDayYet(){
 		for(Interacter i: interacters){
 			try{
-				ActivityDay ad = (ActivityDay) i.getEnvironment().getActive();
+				i.getEnvironment().getActive();
 			}catch(ClassCastException e){
 				return i;
 			}

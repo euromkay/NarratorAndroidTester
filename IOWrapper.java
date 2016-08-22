@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-import android.NActivity;
 import android.app.Activity;
 import android.app.Environment;
 import android.app.Environment.EnvironmentListener;
@@ -66,6 +65,7 @@ public class IOWrapper {
 			host.login(login);
 		host.clickHost();
 		host.clickNameHost();
+		setSeed(seed);
 		
 		
 		return host;
@@ -79,7 +79,7 @@ public class IOWrapper {
 	private Environment EnvironmentCreator(){
 		final Environment e = new Environment(new EnvironmentListener(){
 			public void onActivityChange(Activity a, Environment e){
-				NActivity na = (NActivity) a;
+				//NActivity na = (NActivity) a;
 				//na.server.Destroy();
 				FirebaseAuth.e = e;
 			}
@@ -164,7 +164,7 @@ public class IOWrapper {
 		
 		ActivityHome ah = (ActivityHome) c.getEnvironment().getActive();
 		
-		while(ah.getFragmentManager().get("namePrompt") == null)
+		while(ah.getFragmentManager().getFragment(null, "namePrompt") == null)
 			Log.m("Client (IOWrapper)", "waiting for connect to host by detecting nameprompt");;
 		
 		c.setName(name);

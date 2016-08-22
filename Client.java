@@ -1,6 +1,6 @@
 package iowrapper;
 
-import org.json.JSONArray;
+import json.JSONArray;
 
 import android.GUIController;
 import android.JUtils;
@@ -14,7 +14,6 @@ import android.screens.ActivityHome;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.wifi.SocketClient;
 import shared.logic.Narrator;
 import shared.logic.PlayerList;
 import voss.narrator.R;
@@ -37,7 +36,7 @@ public class Client extends Interacter{
 	}
 	public void clickNameJoin() {
 		ActivityHome aH = (ActivityHome) e.getActive();
-		NamePrompt np = (NamePrompt) aH.getFragmentManager().get("namePrompt");
+		NamePrompt np = (NamePrompt) aH.getFragmentManager().getFragment(null, "namePrompt");
 		
 		np.posClick();
 		
@@ -45,20 +44,14 @@ public class Client extends Interacter{
 	public void connect(String ip) {
 		ip = ip.substring("Host Code: ".length());
 		ActivityHome aH = (ActivityHome) e.getActive();
-		IpPrompt ipp = (IpPrompt) aH.getFragmentManager().get("ipprompt");
+		IpPrompt ipp = (IpPrompt) aH.getFragmentManager().getFragment(null, "ipprompt");
 		
 		EditText et = (EditText) ipp.mainView.findViewById(R.id.home_nameET);
 		et.setText(ip);
 		
 		ipp.posClick();
 		
-		while(e.getService(SocketClient.class) == null){
-			Log.m("Client " + name, "SocketClient service starting");
-		}
-		SocketClient sc = (SocketClient) e.getService(SocketClient.class);
-		while(sc.getChat() == null){
-			Log.m("Client " + name, "Preparing chat manager");
-		}
+		
 		
 	}
 	
@@ -80,6 +73,10 @@ public class Client extends Interacter{
 				players.add(n.getPlayerByName(JUtils.getString(jArray, i)));
 			return players;
 		}
+	}
+	public void joinGame() {
+		clickButton(R.id.home_join);
+		nSwitch.consume(2);
 	}
 	
 	
