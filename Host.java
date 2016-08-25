@@ -13,7 +13,6 @@ import android.setup.ActivityCreateGame;
 import android.setup.SetupManager;
 import android.setup.SetupScreenController;
 import android.texting.StateObject;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -72,12 +71,8 @@ public class Host extends Interacter{
 			ac.getManager().ns.local.setSeed(0);
 		((Button)ac.findViewById(R.id.roles_startGame)).click();
 		
-		
-		
-		Interacter i;
-		while((i = ws.notOnActivityDayYet()) != null){
-			Log.m("Host", "waiting for " + i.getName() + " to change to activity day");
-		}
+		if(nSwitch != null)
+			nSwitch.consume();
 	}
 
 	public void addRole(RoleTemplate role, String factionName) {
@@ -87,13 +82,8 @@ public class Host extends Interacter{
 		clickListing(ac.cataLV, factionName);
 		clickListing(ac.rolesLV, role.getName());
 			
-		
-		
-		
-		Interacter i;
-		while((i = ws.missingRoles(getNarrator().getAllRoles().size())) != null){
-			Log.m("Host", "waiting for " + i.getName() + " to add " + role.getName());
-		}
+		if(nSwitch != null)
+			nSwitch.consume();
 	}
 
 	public void addRandomRole() {

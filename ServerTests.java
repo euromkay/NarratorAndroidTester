@@ -5,15 +5,19 @@ import java.util.ArrayList;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.client.WebSocketClient.WebListener;
 
+import android.GUIController;
 import android.NActivity;
+import android.NarratorService;
 import android.alerts.PlayerPopUp;
 import android.alerts.TeamEditor;
 import android.app.Environment;
 import android.app.FragmentManager;
 import android.day.ActivityDay;
+import android.day.DayScreenController;
 import android.os.Bundle;
 import android.screens.ActivityHome;
 import android.setup.ActivityCreateGame;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -21,8 +25,13 @@ import android.widget.TextView;
 import json.JSONException;
 import json.JSONObject;
 import junit.framework.TestCase;
+import nnode.Instance;
 import nnode.NodeSwitch.SwitchListener;
+import shared.logic.Narrator;
+import shared.logic.Player;
+import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
+import shared.roles.Arsonist;
 import voss.narrator.R;
 
 public class ServerTests extends TestCase{
@@ -115,6 +124,28 @@ public class ServerTests extends TestCase{
 		return interacters;
 	}
 	
+	public void testPlayerListChange(){
+		IOWrapper wrap = new IOWrapper();
+		startSwitch(wrap);
+		Host h1 = wrap.initHost();
+		h1.login(0);
+		h1.setSwitch(nSwitch);
+		h1.hostGame();
+		
+		ActivityCreateGame ach = h1.getActivityCreateGame();
+		h1.clickButton(R.id.roles_show_Players);
+		PlayerPopUp pPop = ach.pPop;
+		assertEquals(1, pPop.lv.size());
+		
+		Client c = wrap.initClient();
+		c.login(1);
+		c.setSwitch(nSwitch);
+		c.clickButton(R.id.home_join);
+		nSwitch.consume(3);
+		
+		assertEquals(2, pPop.lv.size());
+	}
+	
 	public void testEditRoles(){
 		ArrayList<Interacter> interacters = init(2);
 		Host h1 = (Host) interacters.get(0);
@@ -136,6 +167,76 @@ public class ServerTests extends TestCase{
 		nSwitch.consume();
 		
 		assertEquals(1, emptyAdapter.size());
+		
+	}
+	
+	public void testButton(){
+		ArrayList<Interacter> interacters = init(2);
+		Host h = (Host) interacters.get(0);
+		
+		h.addRole(BasicRoles.Mayor(), "Town");
+		h.addRole(BasicRoles.Arsonist(), "Neutrals");
+		h.addRole(BasicRoles.Citizen(), "Town");
+		
+		Instance curInstance = nSwitch.nSwitch.instances.get(0);
+		curInstance.n.getRules().setBool(Rules.DAY_START, Narrator.DAY_START);
+		curInstance.n.setSeed(0);
+		
+		h.clickStart();
+		
+		assertTrue(curInstance.n.isInProgress());
+		
+		Player host = curInstance.n.getPlayerByName("voss");
+		assertTrue(host.is(Arsonist.class));
+		assertTrue(host.hasDayAction());
+		assertTrue(curInstance.n.isDay());
+		
+		ActivityDay ad = (ActivityDay) h.getActivity();
+		GUIController gCon = h.getController();
+		gCon.infoPanelClick();
+		assertTrue(ad.manager.getCurrentPlayer() != null);
+		assertEquals(View.VISIBLE, ad.button.getVisibility());
+		
+		for(Player p: curInstance.n.getAllPlayers()){
+			if(curInstance.n.isDay())
+				p.voteSkip();
+		}
+		
+		assertTrue(curInstance.n.isNight());
+		gCon.actionPanelClick();
+		
+		//text changes, server doesn't quite now yet that host ended night
+		assertEquals(DayScreenController.SKIP_NIGHT_TEXT, ad.button.getText().toString());
+		h.clickButton(R.id.day_button);
+		assertEquals(DayScreenController.CANCEL_SKIP_NIGHT_TEXT, ad.button.getText().toString());
+		
+		//server knows ended night, and tells client as well
+		nSwitch.consume();
+		assertTrue(ad.ns.endedNight(null));
+		assertTrue(host.endedNight());
+		assertEquals(DayScreenController.CANCEL_SKIP_NIGHT_TEXT, ad.button.getText().toString());
+		
+		//text changes, server doesn't quite now yet that host changed his mind
+		h.clickButton(R.id.day_button);
+		assertTrue(ad.ns.endedNight(null));
+		assertEquals(DayScreenController.SKIP_NIGHT_TEXT, ad.button.getText().toString());
+		
+		//now server knows
+		nSwitch.consume();
+		assertFalse(ad.ns.endedNight(null));
+		assertFalse(host.endedNight());
+		assertEquals(DayScreenController.SKIP_NIGHT_TEXT, ad.button.getText().toString());
+	}
+	
+	public void testLeaveGame(){
+		ArrayList<Interacter> interacters = init(2);
+		Client client = (Client) interacters.get(1);
+		
+		client.clickButton(R.id.roles_startGame);
+		assertEquals(client.getActivity().getClass(), ActivityHome.class);
+		nSwitch.consume();
+		assertEquals(2, nSwitch.nSwitch.instances.get(0).n.getPlayerCount());
+		assertEquals(client.getActivity().getClass(), ActivityHome.class);
 		
 	}
 	
@@ -200,7 +301,7 @@ public class ServerTests extends TestCase{
 		c1.clickButton(R.id.home_join);
 		c2.clickButton(R.id.home_join);
 		
-		nSwitch.consume(2); //2 join requests
+		nSwitch.consume(4); //2 join requests
 		
 		assertEquals(3, nSwitch.nSwitch.instances.get(0).n.getPlayerCount());
 		
@@ -289,7 +390,14 @@ public class ServerTests extends TestCase{
 	
 	public void testReconnect(){
 		Host h = (Host) init(0).get(0);
-		h.getActivity().ns.mWebSocketClient.onClose(i, s, b);
+		NarratorService.WAIT_TIME = 0;
+		WebSocketClient socket = h.getActivity().ns.mWebSocketClient;
+		socket.onError(new NullPointerException());
 		
+		try{
+			Thread.sleep(500);	
+		}catch(InterruptedException e){}
+		
+		assertTrue(socket != h.getActivity().ns.mWebSocketClient);
 	}
 }

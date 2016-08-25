@@ -414,7 +414,7 @@ public class PhoneGUITests extends TestCase{
 		h.addTeam("Bro", "#3FA");
 		h.clickButton(R.id.create_editMembersButton);
 
-		TeamEditor te = (TeamEditor) ac.getFragmentManager().getFragment(null, "editTeam");
+		TeamEditor te = (TeamEditor) ac.tEditor;
 		assertEquals(te.getDialog().getTitle(), TeamEditor.EDITING_ROLES_TITLE);
 		
 		//test headers

@@ -76,7 +76,7 @@ public class Client extends Interacter{
 	}
 	public void joinGame() {
 		clickButton(R.id.home_join);
-		nSwitch.consume(2);
+		nSwitch.consume(3);
 	}
 	
 	
