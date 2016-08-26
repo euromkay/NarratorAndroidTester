@@ -400,4 +400,66 @@ public class ServerTests extends TestCase{
 		
 		assertTrue(socket != h.getActivity().ns.mWebSocketClient);
 	}
+	
+	public void testVotePersistance(){
+		ArrayList<Interacter> interacters = init(2);
+		Host h = (Host) interacters.get(0);
+		
+		h.addRole(BasicRoles.Mayor(), "Town");
+		h.addRole(BasicRoles.Arsonist(), "Neutrals");
+		h.addRole(BasicRoles.Citizen(), "Town");
+		
+		Instance curInstance = nSwitch.nSwitch.instances.get(0);
+		curInstance.n.getRules().setBool(Rules.DAY_START, Narrator.DAY_START);
+		curInstance.n.setSeed(0);
+		
+		h.clickStart();
+		
+		assertTrue(curInstance.n.isInProgress());
+		
+		Player host = curInstance.n.getPlayerByName("voss");
+		assertTrue(host.is(Arsonist.class));
+		assertTrue(host.hasDayAction());
+		assertTrue(curInstance.n.isDay());
+		
+		ActivityDay ad = (ActivityDay) h.getActivity();
+		GUIController gCon = h.getController();
+		gCon.actionPanelClick();
+		
+		ad.actionLV.click(0);
+		assertEquals(0, ad.actionLV.getCheckedItemPosition());
+		
+		nSwitch.consume();
+		assertEquals(0, ad.actionLV.getCheckedItemPosition());
+		
+		
+		
+		ad.actionLV.click(1);
+		assertEquals(0, ad.actionLV.getCheckedItemPosition());
+		
+		nSwitch.consume();
+		assertEquals(1, ad.actionLV.getCheckedItemPosition());
+		
+		
+		
+		ad.actionLV.click(2);
+		assertEquals(1, ad.actionLV.getCheckedItemPosition());
+		
+		nSwitch.consume();
+		assertEquals(2, ad.actionLV.getCheckedItemPosition());
+	}
+	
+	public void testMembersShowing(){
+		ArrayList<Interacter> interacters = init(2);
+		Host h = (Host) interacters.get(0);
+		
+		h.addRole(BasicRoles.Mayor(), "Town");
+		h.addRole(BasicRoles.Arsonist(), "Neutrals");
+		h.addRole(BasicRoles.Citizen(), "Town");
+
+		h.clickStart();
+		
+		GUIController gCon = h.getController();
+		assertEquals(3, gCon.dScreen.membersLV.size());
+	}
 }

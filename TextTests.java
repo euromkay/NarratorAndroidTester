@@ -60,5 +60,4 @@ public class TextTests extends TestCase{
 	private ArrayList<String> split(String text){
 		return CommunicatorText.splitMessages(text);
 	}
-
 }
