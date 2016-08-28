@@ -35,4 +35,11 @@ public class SwitchWrapper {
 		}
 		return null;
 	}
+
+	public void consumeAll() {
+		for(int i = 0; i < messages.size(); i++){
+			consume();
+		}
+		
+	}
 }

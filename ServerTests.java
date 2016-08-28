@@ -449,6 +449,29 @@ public class ServerTests extends TestCase{
 		assertEquals(2, ad.actionLV.getCheckedItemPosition());
 	}
 	
+	public void testClientChat(){
+		ArrayList<Interacter> interacters = init(1);
+		Host h = (Host) interacters.get(0);
+		Client c = (Client) interacters.get(1);
+		
+		h.clickFaction("Town");
+
+		c.clickFaction("Mafia");
+		
+		c.clickButton(R.id.create_toChat);
+		if(c.getActivityCreateGame().chatVisible())
+			c.clickButton(R.id.create_toChat);
+		c.clickButton(R.id.create_toChat);
+
+		h.clickListing(h.getActivityCreateGame().rolesLV, "Citizen");
+
+		assertTrue(c.getActivityCreateGame().chatVisible());
+		
+		nSwitch.consumeAll();
+		assertTrue(c.getActivityCreateGame().chatVisible());
+		assertEquals(View.GONE, c.getActivityCreateGame().rolesLV.getVisibility());
+	}
+	
 	public void testMembersShowing(){
 		ArrayList<Interacter> interacters = init(2);
 		Host h = (Host) interacters.get(0);
@@ -461,5 +484,20 @@ public class ServerTests extends TestCase{
 		
 		GUIController gCon = h.getController();
 		assertEquals(3, gCon.dScreen.membersLV.size());
+	}
+	
+	public void testEndNightPersistance(){
+		ArrayList<Interacter> interacters = init(2);
+		Host h = (Host) interacters.get(0);
+		
+		h.addRole(BasicRoles.Mayor(), "Town");
+		h.addRole(BasicRoles.Arsonist(), "Neutrals");
+		h.addRole(BasicRoles.Citizen(), "Town");
+
+		Instance curInstance = nSwitch.nSwitch.instances.get(0);
+		curInstance.n.getRules().setBool(Rules.DAY_START, Narrator.DAY_START);
+		curInstance.n.setSeed(0);
+		
+		h.clickStart();
 	}
 }
