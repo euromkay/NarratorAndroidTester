@@ -486,6 +486,40 @@ public class ServerTests extends TestCase{
 		assertEquals(3, gCon.dScreen.membersLV.size());
 	}
 	
+	public void testNightChat(){
+		ArrayList<Interacter> interacters = init(2);
+		Host h = (Host) interacters.get(0);
+		
+		h.addRole(BasicRoles.Mayor(), "Town");
+		h.addRole(BasicRoles.Arsonist(), "Neutrals");
+		h.addRole(BasicRoles.Citizen(), "Town");
+
+		Instance curInstance = nSwitch.nSwitch.instances.get(0);
+		curInstance.n.getRules().setBool(Rules.DAY_START, Narrator.DAY_START);
+		
+		h.clickStart();
+		nSwitch.consumeAll();
+		for(Player p: curInstance.n.getAllPlayers()){
+			if(curInstance.n.isDay()){
+				p.voteSkip();
+			}
+		}
+		
+		for(Player p: curInstance.n.getAllPlayers()){
+			p.endNight();
+		}
+		
+		for(Player p: curInstance.n.getAllPlayers()){
+			if(curInstance.n.isDay()){
+				p.voteSkip();
+			}
+		}
+		
+		assertTrue(h.getController().dScreen.chatTV.getText().toString().contains("Night 1"));
+		assertTrue(h.getController().dScreen.chatTV.getText().toString().contains("Night 2"));
+	}
+
+	
 	public void testEndNightPersistance(){
 		ArrayList<Interacter> interacters = init(2);
 		Host h = (Host) interacters.get(0);
