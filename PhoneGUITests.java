@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.GUIController;
 import android.NActivity;
+import android.alerts.PlayerPopUp;
 import android.alerts.TeamBuilder;
 import android.alerts.TeamEditor;
 import android.day.DayScreenController;
@@ -73,6 +74,25 @@ public class PhoneGUITests extends TestCase{
 			
 			wrap.close();
 		}
+	}
+	
+	public void testRemovePlayer(){
+		IOWrapper wrap = new IOWrapper();
+		
+		Host h1 = wrap.startHost();  //no seed means no setting what seed we're using
+		h1.newPlayer("C1");
+		h1.newPlayer("C2");
+		
+		ActivityCreateGame ac = h1.getActivityCreateGame();
+		h1.clickButton(R.id.roles_show_Players);
+		PlayerPopUp pPop = ac.pPop;
+		
+		assertEquals(3, pPop.lv.size());
+		pPop.lv.click(1);
+		assertEquals(3, pPop.lv.size());
+		pPop.lv.click(1);
+		
+		assertEquals(2, pPop.lv.size());
 	}
 	
 	public void testDriverAbilityTest(){

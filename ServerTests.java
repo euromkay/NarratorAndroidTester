@@ -16,6 +16,7 @@ import android.day.ActivityDay;
 import android.day.DayScreenController;
 import android.os.Bundle;
 import android.screens.ActivityHome;
+import android.screens.SimpleGestureFilter;
 import android.setup.ActivityCreateGame;
 import android.view.View;
 import android.widget.CheckBox;
@@ -83,6 +84,40 @@ public class ServerTests extends TestCase{
 		nSwitch.consume();
 		nSwitch.consume();
 		assertEquals(nSwitch.nSwitch.instances.get(0).host.getName(), h1.getName());
+	}
+	
+	public void testAssassinScreen(){
+		ArrayList<Interacter> interacters = init(2);
+		Host h1 = (Host) interacters.get(0);
+		
+		h1.addRole(BasicRoles.Assassin(), "Mafia");
+		h1.addRole(BasicRoles.Assassin(), "Mafia");
+		h1.addRole(BasicRoles.Assassin(), "Yakuza");
+		
+		h1.dayStart();
+		Narrator n = nSwitch.nSwitch.instances.get(0).n;
+		h1.clickStart();
+		assertEquals(3, n.getAllRoles().size());
+		assertTrue(n.isInProgress());
+		
+		ActivityDay ad = h1.getController().dScreen;
+		assertTrue(h1.getController().swipeAbilityPanel("Assassinate"));
+		h1.getController().dScreen.onSwipe(SimpleGestureFilter.SWIPE_LEFT);
+		
+		assertEquals(View.GONE, ad.button.getVisibility());
+
+		assertTrue(h1.getController().swipeAbilityPanel("Assassinate"));
+		assertEquals(View.VISIBLE, ad.button.getVisibility());
+		
+		ad.actionLV.click(0);
+		nSwitch.consumeAll();
+		assertTrue(n.isInProgress());
+		assertTrue(ad.actionLV.getCheckedItemPosition() == 0);
+		assertTrue(n.getLivePlayers().size() == 3);
+		
+		h1.clickButton(R.id.day_button);
+		nSwitch.consumeAll();
+		assertTrue(n.getLivePlayers().size() == 2);
 	}
 	
 	public void testHostGame(){
@@ -204,6 +239,8 @@ public class ServerTests extends TestCase{
 		
 		assertTrue(curInstance.n.isNight());
 		gCon.actionPanelClick();
+		
+		assertEquals(View.VISIBLE, ad.button.getVisibility());
 		
 		//text changes, server doesn't quite now yet that host ended night
 		assertEquals(DayScreenController.SKIP_NIGHT_TEXT, ad.button.getText().toString());

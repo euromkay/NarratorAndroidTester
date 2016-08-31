@@ -155,6 +155,8 @@ public class Host extends Interacter{
 		if(cb.isChecked())
 			return;
 		cb.toggle();
+		if(nSwitch != null)
+			nSwitch.consume();
 	}
 
 	public void setAllComputers() {
