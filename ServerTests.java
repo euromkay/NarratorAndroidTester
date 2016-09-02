@@ -265,6 +265,27 @@ public class ServerTests extends TestCase{
 		assertEquals(DayScreenController.SKIP_NIGHT_TEXT, ad.button.getText().toString());
 	}
 	
+	public void testChat(){
+		ArrayList<Interacter> interacters = init(2);
+		Host h = (Host) interacters.get(0);
+		
+		h.addRole(BasicRoles.Mayor(), "Town");
+		h.addRole(BasicRoles.Arsonist(), "Neutrals");
+		h.addRole(BasicRoles.Citizen(), "Town");
+		
+		h.dayStart();
+		h.clickStart();
+
+		ActivityDay ad = h.getController().dScreen;
+		GUIController.selectScreen(ad, "Voss");
+		h.getController().actionPanelClick();
+		ad.actionLV.click(0);
+		nSwitch.consumeAll();
+		
+		ad.actionLV.click(0);
+		nSwitch.consumeAll();
+	}
+	
 	public void testLeaveGame(){
 		ArrayList<Interacter> interacters = init(2);
 		Client client = (Client) interacters.get(1);

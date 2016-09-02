@@ -7,6 +7,7 @@ import android.NActivity;
 import android.alerts.PlayerPopUp;
 import android.alerts.TeamBuilder;
 import android.alerts.TeamEditor;
+import android.day.ActivityDay;
 import android.day.DayScreenController;
 import android.graphics.Color;
 import android.screens.ListingAdapter;
@@ -18,6 +19,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import junit.framework.TestCase;
 import shared.ai.Computer;
+import shared.logic.Narrator;
 import shared.logic.Player;
 import shared.logic.PlayerList;
 import shared.logic.Team;
@@ -486,6 +488,43 @@ public class PhoneGUITests extends TestCase{
 		assertEquals(0, ac.rolesListLV.size());
 	}
 	
+	public void testDeselect(){
+		IOWrapper wrap = new IOWrapper();
+		Host h = wrap.startHost();
+		h.newPlayer("p1");
+		h.newPlayer("p2");
+		
+		h.addRole(BasicRoles.MassMurderer(), "Neutrals");
+		h.addRole(BasicRoles.Sheriff(), "Town");
+		h.addRole(BasicRoles.Doctor(),  "Town");
+		
+		h.dayStart();
+		h.clickStart();
+		
+		Narrator n = h.getNarrator();
+		assertTrue(n.isInProgress());
+		
+		Player p1 = n.getPlayerByName("p1");
+		Player p2 = n.getPlayerByName("p2");
+		
+		
+		
+		
+		h.getController().vote(p1, p2);
+		assertEquals(1, p2.getVoteCount());
+		h.getController().unvote(p1);
+		
+		assertTrue(p2.getVoters().isEmpty());
+		
+		p1.voteSkip();
+		p2.voteSkip();
+		
+		ActivityDay ad = h.getController().dScreen;
+		ad.actionLV.click(0);
+		ad.actionLV.click(1);
+		
+		assertEquals(1, ad.actionLV.getCheckedItemPosition());
+	}
 	
 }
 
