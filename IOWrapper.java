@@ -15,9 +15,9 @@ import android.setup.ActivityCreateGame;
 import android.telephony.SmsManager;
 import android.util.Log;
 import shared.ai.Brain;
+import shared.ai.Controller;
 import shared.logic.Narrator;
 import shared.logic.Player;
-import shared.logic.PlayerList;
 import shared.logic.support.Random;
 import voss.narrator.R;
 
@@ -198,29 +198,28 @@ public class IOWrapper {
 
 	private ArrayList<Interacter> interacters = new ArrayList<Interacter>();
 	public void startBrain(){
-		brain = new Brain(new PlayerList(), rand);
-		brain.setTargetAnyone(true);
 		
 		interacters.remove(host);
 		interacters.add(host);
 		//host shouldn't readd people
 		
+
+		HashMap<Player, Controller> controls = new HashMap<>();
 		for(Interacter inc: interacters){
 			for(Player p: inc.getPlayers()){
-				brain.addSlave(p, inc.getController());
+				controls.put(p,  inc.getController());
 			}
 		}
+		brain = new Brain(controls, rand);
+		if(!host.getActivity().ns.server.IsLoggedIn()){
+			brain.setNarrator(host.getActivity().ns.local);
+		}
+		
 	}
 	public Brain getBrain(){
 		return brain;
 	}
 	public void doActions() {
-		//System.out.println(host.getNarrator().getDayNumber());
-		if(host.getNarrator().getDayNumber() == 3){
-			//System.out.println(host.getNarrator().getLivePlayers());
-		}
-		//if(!host.getNarrator().isInProgress())
-			//return;
 		boolean day = host.getNarrator().isDay();
 		if(day){
 			brain.dayAction();
@@ -233,11 +232,6 @@ public class IOWrapper {
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {}
-		
-		//Interacter i;
-		//while((i = ws.isOnPhase(day)) != null){
-			//Log.m("Brain", "waiting on " + i.getName() + " to change phase");
-		//}
 	}
 
 	public void start() {

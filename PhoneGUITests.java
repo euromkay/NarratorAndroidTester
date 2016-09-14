@@ -210,8 +210,12 @@ public class PhoneGUITests extends TestCase{
 	
 	public void testDoubleClick(){
 		IOWrapper wrap = new IOWrapper();
+
+		Long l = new Random().nextLong();
+		//Long l = Long.parseLong("-6729159550149294020");
+		System.out.println("Testing Double Click: \t " + l);
 		
-		Host h = wrap.startHost();
+		Host h = wrap.startHost(l);
 		
 		int playerSize = 15;
 		
@@ -230,7 +234,8 @@ public class PhoneGUITests extends TestCase{
 			h.addRandomRole();
 		}
 		
-		h.clickStart();
+		
+		h.clickStart(l);
 		
 		assertTrue(h.getNarrator().isInProgress());
 		

@@ -269,9 +269,9 @@ public class ServerTests extends TestCase{
 		ArrayList<Interacter> interacters = init(2);
 		Host h = (Host) interacters.get(0);
 		
-		h.addRole(BasicRoles.Mayor(), "Town");
+		h.addRole(BasicRoles.Mayor(),    "Town");
 		h.addRole(BasicRoles.Arsonist(), "Neutrals");
-		h.addRole(BasicRoles.Citizen(), "Town");
+		h.addRole(BasicRoles.Citizen(),  "Town");
 		
 		h.dayStart();
 		h.clickStart();

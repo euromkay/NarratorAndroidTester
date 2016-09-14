@@ -65,14 +65,17 @@ public class Host extends Interacter{
 	}
 	public void clickStart(Long seed) {
 		ActivityCreateGame ac = (ActivityCreateGame) e.getActive();
-		if(seed != null)
-			ac.getManager().ns.local.setSeed(seed);
-		else
-			ac.getManager().ns.local.setSeed(0);
+		if(seed == null)
+			seed = (long) 0;
+		
+		ac.getManager().ns.local.setSeed(seed);
+		
 		((Button)ac.findViewById(R.id.roles_startGame)).click();
 		
 		if(nSwitch != null)
 			nSwitch.consume();
+		
+		//((ActivityDay) e.getActive()).manager.b.random.setSeed(seed);
 	}
 
 	public void addRole(RoleTemplate role, String factionName) {
