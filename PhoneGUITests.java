@@ -45,8 +45,8 @@ public class PhoneGUITests extends TestCase{
 			IOWrapper wrap = new IOWrapper();
 			
 			long seed = new Random().nextLong();
-			//long seed = Long.parseLong("6563289330430437151");
-			//System.out.println(seed);
+			//long seed = Long.parseLong("6278177073870124829");
+			System.out.println("Testing Single Host\t" + seed);
 			Host h = wrap.startHost(seed);
 			
 			h.addRole(BasicRoles.MassMurderer(), "Neutrals");

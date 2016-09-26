@@ -95,7 +95,7 @@ public class IOWrapper {
 		e.addButton(R.id.home_host);
 		e.addButton(R.id.home_login_signup);
 		e.addTextView(R.id.home_tutorial);
-		e.addTextView(R.id.home_currentGames, R.id.create_info_label);
+		e.addTextView(R.id.home_roleCard, R.id.create_info_label);
 
 		e.addRecyclerView(R.id.day_playerNavigationPane);
 

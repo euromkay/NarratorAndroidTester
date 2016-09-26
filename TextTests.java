@@ -3,11 +3,18 @@ package iowrapper;
 import java.util.ArrayList;
 
 import android.texting.CommunicatorText;
+import android.texting.TextController;
+import android.texting.TextHandler;
+import android.texting.TextInput;
 import android.widget.TextView;
 import junit.framework.TestCase;
+import shared.logic.Narrator;
 import shared.logic.Player;
 import shared.logic.PlayerList;
+import shared.logic.Team;
+import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
+import shared.roles.Citizen;
 import voss.narrator.R;
 
 public class TextTests extends TestCase{
@@ -25,7 +32,7 @@ public class TextTests extends TestCase{
 		
 		ArrayList<String> bMessages = brian.getMessages();
 		assertFalse(bMessages.get(0).equals(bMessages.get(1)));
-		assertEquals(5, bMessages.size());
+		assertEquals(10, bMessages.size());
 		
 		PlayerList players = h.getNarrator().getAllPlayers();
 		Player host = players.getPlayerByName(h.getName());
@@ -55,6 +62,51 @@ public class TextTests extends TestCase{
 		assertEquals(2, splits.size());
 		
 		//new lines shouldn't be in the text that is sent
+	}
+	
+	public void testMafiaDeadSend(){
+		Narrator n = Narrator.Default();
+		n.addPlayer("A");
+		n.addPlayer("B");
+		n.addPlayer("C");
+		n.addPlayer("D");
+		TextHandler th = new TextHandler(n, n.getAllPlayers());
+		TextController tc = new TextController(new TextInput(){
+
+			public void text(Player p, String message, boolean sync) {
+				th.text(p, message, sync);
+			}
+		});
+		
+		n.addRole(BasicRoles.Citizen());
+		n.addRole(BasicRoles.Mafioso());
+		n.addRole(BasicRoles.Mafioso());
+		n.addRole(BasicRoles.Mafioso());
+		
+		n.getRules().setBool(Rules.DAY_START, Narrator.DAY_START);
+		n.startGame();
+		
+		PlayerList pl = n.getAllPlayers();
+		Player cit = null;
+		for(Player p: pl.copy()){
+			if(p.is(Citizen.class)){
+				cit = p;
+				pl.remove(p);
+				break;
+			}
+		}
+		
+		Player toLynch = pl.getFirst();
+		pl.remove(toLynch);
+		
+		for(Player p: pl)
+			p.vote(toLynch);
+		//cit.vote(toLynch);
+		th.text(cit, "vote " + toLynch.getName().toLowerCase(), false);
+		
+		assertTrue(n.isNight());
+		
+		tc.setNightTarget(toLynch, cit, Team.KILL);
 	}
 	
 	private ArrayList<String> split(String text){
