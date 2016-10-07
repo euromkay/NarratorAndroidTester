@@ -7,7 +7,12 @@ import android.texting.TextController;
 import android.texting.TextHandler;
 import android.texting.TextInput;
 import android.widget.TextView;
+import json.JSONException;
+import json.JSONObject;
 import junit.framework.TestCase;
+import nnode.Instance;
+import nnode.NodeSwitch;
+import nnode.WebPlayer;
 import shared.logic.Narrator;
 import shared.logic.Player;
 import shared.logic.PlayerList;
@@ -15,6 +20,7 @@ import shared.logic.Team;
 import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
 import shared.roles.Citizen;
+import shared.roles.SerialKiller;
 import voss.narrator.R;
 
 public class TextTests extends TestCase{
@@ -61,7 +67,9 @@ public class TextTests extends TestCase{
 		
 		assertEquals(2, splits.size());
 		
-		//new lines shouldn't be in the text that is sent
+		for(String s: splits){
+			assertFalse(s.contains("\n"));
+		}
 	}
 	
 	public void testMafiaDeadSend(){
@@ -111,5 +119,36 @@ public class TextTests extends TestCase{
 	
 	private ArrayList<String> split(String text){
 		return CommunicatorText.splitMessages(text);
+	}
+	
+	public void testInstancePreferring(){
+		Narrator n = Narrator.Default();
+		Player a = n.addPlayer("A");
+		n.addPlayer("B");
+		n.addPlayer("C");
+		
+		n.addRole(BasicRoles.Citizen());
+		n.addRole(BasicRoles.Mafioso());
+		n.addRole(BasicRoles.SerialKiller());
+		
+		NodeSwitch ns = new NodeSwitch();
+		Instance i = new Instance(ns);
+		
+		
+		try {
+			JSONObject jo = new JSONObject();
+			jo.put("message", "say null -prefer Serial Killer");
+			jo.put("name", "A");
+			WebPlayer np = new WebPlayer("A", ns);
+			np.player = a;
+			i.handlePlayerMessage(np, jo);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail();
+		}
+		
+		n.startGame();
+		
+		assertTrue(a.is(SerialKiller.class));
 	}
 }
