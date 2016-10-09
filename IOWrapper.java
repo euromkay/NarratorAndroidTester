@@ -136,7 +136,7 @@ public class IOWrapper {
 		
 		e.addSpinner(R.id.day_frameSpinner);
 		
-		e.addCheckBox(R.id.create_check1, R.id.create_check2, R.id.create_check3);
+		e.addCheckBox(R.id.create_check1, R.id.create_check2, R.id.create_check3, R.id.create_check4);
 		
 		
 		HashMap<Integer, String[]> resources = new HashMap<>();
