@@ -30,9 +30,13 @@ import nnode.Instance;
 import nnode.NodeSwitch.SwitchListener;
 import shared.logic.Narrator;
 import shared.logic.Player;
+import shared.logic.support.Constants;
+import shared.logic.support.Random;
+import shared.logic.support.RoleTemplate;
 import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
 import shared.roles.Arsonist;
+import shared.roles.RandomMember;
 import voss.narrator.R;
 
 public class ServerTests extends TestCase{
@@ -68,6 +72,21 @@ public class ServerTests extends TestCase{
 				}
 			}
 		};
+	}
+	
+	public void testNeutralBenign(){
+		IOWrapper wrap = new IOWrapper();
+		startSwitch(wrap);
+		
+		long seed = new Random().nextLong();
+		//long seed = Long.parseLong("6278177073870124829");
+		System.out.println("Testing Neutral Benign(Instance)\t" + seed);
+
+		ArrayList<Interacter> interacters = init(2);
+		Host h1 = (Host) interacters.get(0);
+		h1.addRole(RandomMember.NeutralBenignRandom(), "Randoms");
+		
+		assertEquals(1, nSwitch.nSwitch.instances.get(0).n.getAllRoles().size());
 	}
 	
 	public void testJoinGame(){
@@ -528,6 +547,60 @@ public class ServerTests extends TestCase{
 		nSwitch.consumeAll();
 		assertTrue(c.getActivityCreateGame().chatVisible());
 		assertEquals(View.GONE, c.getActivityCreateGame().rolesLV.getVisibility());
+	}
+	
+	public void testCustomFactions(){
+		ArrayList<Interacter> interacters = init(0);
+		Host h = (Host) interacters.get(0);
+		
+
+		ActivityCreateGame ac = h.getActivityCreateGame();
+		h.clickFaction("Randoms");
+		int prevSize = ac.rolesLV.size();
+		
+		h.addTeam("Bro", "FF0011");
+		for(Interacter i: interacters){
+			assertEquals(6, ((ActivityCreateGame) i.getEnvironment().getActive()).cataLV.size());
+		}
+		
+		h.clickFaction("Bro");
+		h.clickButton(R.id.create_editMembersButton);
+
+		
+		TeamEditor te = h.getActivityCreateGame().tEditor;
+		ArrayList<RoleTemplate> randomRoles;
+		randomRoles = nSwitch.nSwitch.instances.get(0).fManager.getFaction(Constants.A_RANDOM).members;
+		assertTrue(te != null);
+		
+		te.l2.click(8);//hopefully bd
+		nSwitch.consumeAll();
+		assertEquals(1, te.l1.size());
+		assertEquals(10, randomRoles.size());
+		
+		
+		te.l2.click(13);//hopefully escort
+		nSwitch.consumeAll();
+		assertEquals(2, te.l1.size());
+		assertEquals(11, randomRoles.size());
+		
+
+		te.l2.click(19);
+		nSwitch.consumeAll();
+		te.l2.click(19);
+		nSwitch.consumeAll();
+		assertEquals(4, te.l1.size());
+		
+		te.dismiss();
+		
+		h.clickFaction("Randoms");
+		
+		assertEquals(prevSize + 1, ac.rolesLV.size());
+		
+		h.clickListing(ac.rolesLV, "Bro Random");
+		nSwitch.consumeAll();
+		
+		assertEquals(1, ac.rolesListLV.size());
+		
 	}
 	
 	public void testMembersShowing(){

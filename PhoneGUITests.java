@@ -31,6 +31,7 @@ import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
 import shared.roles.Citizen;
 import shared.roles.Driver;
+import shared.roles.RandomMember;
 import voss.narrator.R;
 
 public class PhoneGUITests extends TestCase{
@@ -38,6 +39,19 @@ public class PhoneGUITests extends TestCase{
 	
 	public PhoneGUITests(String name) {
 		super(name);
+	}
+	
+	public void testNeutralBenign(){
+		IOWrapper wrap = new IOWrapper();
+		
+		long seed = new Random().nextLong();
+		//long seed = Long.parseLong("6278177073870124829");
+		System.out.println("Testing NeutralBenign(Phone)\t" + seed);
+		
+		Host h = wrap.startHost(seed);
+		h.addRole(RandomMember.NeutralBenignRandom(), "Randoms");
+		
+		assertEquals(1, h.getNarrator().getAllRoles().size());
 	}
 	
 	public void testSingleHost(){
