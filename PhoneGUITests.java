@@ -140,8 +140,32 @@ public class PhoneGUITests extends TestCase{
 		String commandText = c.dScreen.commandTV.getText().toString();
 		assertFalse(commandText.equals(DayScreenController.HAVENT_ENDED_NIGHT_TEXT));
 		
+		c.swipeAbilityPanel(Driver.COMMAND);
 		
-		c.swipeAbilityPanel(Driver.TEXT1);
+		c.clickPlayer(p1, 0);
+		assertTrue(p1.getActions().isEmpty());
+		
+		try{
+			c.clickPlayer(p1, 1);
+			fail();
+		}catch(PlayerTargetingException e){}
+		
+		//deselecting 
+		c.clickPlayer(p1, 0);
+		assertTrue(p1.getActions().isEmpty());
+		
+		c.clickPlayer(p1, 1);
+		assertTrue(p1.getActions().isEmpty());
+		
+		c.clickPlayer(p2, 0);
+		assertFalse(p1.getActions().isEmpty());
+		
+		try{
+			c.clickPlayer(p2, 1);
+			fail();
+		}catch(PlayerTargetingException e){}
+		
+		
 		assertEquals(3, c.dScreen.actionList.size());
 		c.setNightTarget(p1, p2, Driver.TEXT1);
 		assertEquals(3, c.dScreen.actionList.size());
