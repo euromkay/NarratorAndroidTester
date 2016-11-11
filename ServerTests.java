@@ -504,26 +504,32 @@ public class ServerTests extends TestCase{
 		gCon.actionPanelClick();
 		
 		ad.actionLV.click(0);
-		assertEquals(0, ad.actionLV.getCheckedItemPosition());
+		String clickedText = ad.getCheckedPlayers(0).get(0);
+		assertTrue(clickedText.contains(ad.actionList.get(0)));
 		
 		nSwitch.consume();
-		assertEquals(0, ad.actionLV.getCheckedItemPosition());
+		clickedText = ad.getCheckedPlayers(0).get(0);
+		assertTrue(clickedText.contains(ad.actionList.get(0)));
 		
 		
 		
 		ad.actionLV.click(1);
-		assertEquals(0, ad.actionLV.getCheckedItemPosition());
+		clickedText = ad.getCheckedPlayers(0).get(0);
+		assertTrue(clickedText.contains(ad.actionList.get(0)));
 		
 		nSwitch.consume();
-		assertEquals(1, ad.actionLV.getCheckedItemPosition());
+		clickedText = ad.getCheckedPlayers(0).get(0);
+		assertTrue(clickedText.contains(ad.actionList.get(1)));
 		
 		
 		
 		ad.actionLV.click(2);
-		assertEquals(1, ad.actionLV.getCheckedItemPosition());
+		clickedText = ad.getCheckedPlayers(0).get(0);
+		assertTrue(clickedText.contains(ad.actionList.get(1)));
 		
 		nSwitch.consume();
-		assertEquals(2, ad.actionLV.getCheckedItemPosition());
+		clickedText = ad.getCheckedPlayers(0).get(0);
+		assertTrue(clickedText.contains(ad.actionList.get(2)));
 	}
 	
 	public void testClientChat(){

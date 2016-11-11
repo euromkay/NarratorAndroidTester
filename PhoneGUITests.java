@@ -9,6 +9,7 @@ import android.alerts.TeamBuilder;
 import android.alerts.TeamEditor;
 import android.day.ActivityDay;
 import android.day.DayScreenController;
+import android.day.TargetablesAdapter;
 import android.graphics.Color;
 import android.screens.ListingAdapter;
 import android.setup.ActivityCreateGame;
@@ -23,7 +24,6 @@ import shared.logic.Narrator;
 import shared.logic.Player;
 import shared.logic.PlayerList;
 import shared.logic.Team;
-import shared.logic.exceptions.PlayerTargetingException;
 import shared.logic.support.Constants;
 import shared.logic.support.FactionManager;
 import shared.logic.support.Random;
@@ -32,6 +32,8 @@ import shared.logic.templates.BasicRoles;
 import shared.roles.Citizen;
 import shared.roles.Driver;
 import shared.roles.RandomMember;
+import shared.roles.Role;
+import shared.roles.Witch;
 import voss.narrator.R;
 
 public class PhoneGUITests extends TestCase{
@@ -111,6 +113,116 @@ public class PhoneGUITests extends TestCase{
 		assertEquals(2, pPop.lv.size());
 	}
 	
+	private static CheckBox getCheckbox(ActivityDay ad, String name, int column){
+		TextView tv;
+		for(View v: ad.actionLV.views){
+			tv = (TextView) v.findViewById(R.id.target_name);
+			if(tv.getText().toString().contains(name)){
+				return (CheckBox) v.findViewById(TargetablesAdapter.TranslateColumnToViewId(column));
+			}
+		}
+		return null;
+	}
+	
+	public void testWitchAbility(){
+		IOWrapper wrap = new IOWrapper();
+		
+		Host h1 = wrap.startHost();  //no seed means no setting what seed we're using
+		h1.newPlayer("w1");
+		h1.newPlayer("w2");
+		
+		h1.addRole(BasicRoles.Witch(), "Neutrals");
+		h1.addRole(BasicRoles.Witch(), "Neutrals");
+		h1.addRole(BasicRoles.BusDriver(), "Town");
+		
+		h1.nightStart();
+		h1.clickStart(new Long(0));
+
+		PlayerList pl = h1.getPlayers();
+		Player p1 = pl.getFirst(), w1 = pl.get(1), w2 = pl.get(2);
+		
+		assertTrue(p1.is(Witch.class));
+		GUIController c = (GUIController) h1.getController();
+
+		c.selectSlave(p1);
+		c.actionPanelClick();
+		c.swipeAbilityPanel(Witch.Control);
+		
+		try{
+			c.clickPlayer(p1, 1);
+			fail();
+		}catch(NullPointerException e){}
+		
+		TargetablesAdapter ta = c.dScreen.targetablesAdapter;
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		assertEquals(View.VISIBLE, getCheckbox(c.dScreen, w1.getName(), 0).getVisibility());
+		assertEquals(View.VISIBLE, getCheckbox(c.dScreen, w1.getName(), 1).getVisibility());
+		
+		c.clickPlayer(w1);
+		assertTrue(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		
+		c.clickPlayer(w1);
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
+		assertTrue(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		assertEquals(1, ta.clicked.size());
+		
+		c.clickPlayer(w1);
+		assertTrue(p1.getActions().isEmpty());
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		
+		c.clickPlayer(w1, 0);
+		c.clickPlayer(w1, 1);
+		assertTrue(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
+		assertTrue(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		assertTrue(p1.getActions().isTargeting(Player.list(w1, w1), Witch.MAIN_ABILITY));
+		assertFalse(p1.getActions().isEmpty());
+		
+		c.clickPlayer(w1);
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		assertTrue(p1.getActions().isEmpty());
+
+		c.clickPlayer(w2, 1);
+		c.clickPlayer(w1, 0);
+		assertFalse(p1.getActions().isEmpty());
+		assertTrue(p1.getActions().isTargeting(Player.list(w2, w1), Role.MAIN_ABILITY));
+		assertFalse(p1.getActions().isTargeting(Player.list(w1, w2), Role.MAIN_ABILITY));
+		assertEquals(1, c.dScreen.getCheckedPlayers(0).size());
+		assertEquals(1, c.dScreen.getCheckedPlayers(1).size());
+		assertEquals(w2.getName(), c.dScreen.getCheckedPlayers(1).get(0));
+		assertEquals(w1.getName(), c.dScreen.getCheckedPlayers(0).get(0));
+	}
+	
+	public void testStartScreen(){
+		IOWrapper wrap = new IOWrapper();
+		
+		Host h1 = wrap.startHost();  //no seed means no setting what seed we're using
+		h1.newPlayer("BD1");
+		h1.newPlayer("BD2");
+		
+		h1.addRole(BasicRoles.BusDriver(), "Town");
+		h1.addRole(BasicRoles.BusDriver(), "Town");
+		h1.addRole(BasicRoles.Chauffeur(), "Mafia");
+		
+		h1.nightStart();
+		h1.clickStart();
+		
+		GUIController c = (GUIController) h1.getController();
+		c.rand = new Random();
+		c.rand.setSeed(0);
+		
+		TargetablesAdapter ta = c.dScreen.targetablesAdapter;
+		assertEquals(3, ta.targetables.size());
+		for(String name: ta.targetables){
+			for(int i = 0; i < TargetablesAdapter.MAX; i++){
+				assertEquals(View.GONE, getCheckbox(c.dScreen, name, i).getVisibility());
+			}
+		}
+	}
+	
 	public void testDriverAbilityTest(){
 		IOWrapper wrap = new IOWrapper();
 		
@@ -125,13 +237,12 @@ public class PhoneGUITests extends TestCase{
 		h1.nightStart();
 		h1.clickStart();
 		
-		
 		GUIController c = (GUIController) h1.getController();
 		c.rand = new Random();
 		c.rand.setSeed(0);
 		
 		PlayerList pl = h1.getPlayers();
-		Player p1 = pl.getFirst(), p2 = pl.get(1);
+		Player p1 = pl.getFirst(), p2 = pl.get(1), p3 = pl.get(2);
 		
 		c.selectSlave(p1);
 		assertTrue(c.dScreen.manager.dScreenController.playerSelected());
@@ -141,44 +252,41 @@ public class PhoneGUITests extends TestCase{
 		assertFalse(commandText.equals(DayScreenController.HAVENT_ENDED_NIGHT_TEXT));
 		
 		c.swipeAbilityPanel(Driver.COMMAND);
+		TargetablesAdapter ta = c.dScreen.targetablesAdapter;
+		assertEquals(Driver.COMMAND, c.dScreen.manager.getCommand());
+		assertEquals(View.GONE, getCheckbox(c.dScreen, p1.getName(), 1).getVisibility());
 		
 		c.clickPlayer(p1, 0);
 		assertTrue(p1.getActions().isEmpty());
+		
 		
 		try{
 			c.clickPlayer(p1, 1);
 			fail();
-		}catch(PlayerTargetingException e){}
-		
-		//deselecting 
-		c.clickPlayer(p1, 0);
-		assertTrue(p1.getActions().isEmpty());
-		
-		c.clickPlayer(p1, 1);
-		assertTrue(p1.getActions().isEmpty());
+		}catch(NullPointerException e){}
 		
 		c.clickPlayer(p2, 0);
 		assertFalse(p1.getActions().isEmpty());
+		ta = c.dScreen.targetablesAdapter;
+		assertEquals(2, ta.clicked.size());
 		
-		try{
-			c.clickPlayer(p2, 1);
-			fail();
-		}catch(PlayerTargetingException e){}
+		//deselecting 
+		c.clickPlayer(p1, 0);
+		ta = c.dScreen.targetablesAdapter;
+		assertEquals(1, ta.clicked.size());
+		assertTrue(p1.getActions().isEmpty());
 		
+		c.clickPlayer(p1, 0);
+		assertFalse(p1.getActions().isEmpty());
+		c.clickPlayer(p2, 0);
+		assertTrue(p1.getActions().isEmpty());
 		
-		assertEquals(3, c.dScreen.actionList.size());
-		c.setNightTarget(p1, p2, Driver.TEXT1);
-		assertEquals(3, c.dScreen.actionList.size());
+		c.clickPlayer(p2, 0);
+		c.clickPlayer(p3, 0);
+		//test for proper 'popoff'
 		
-
-		c.swipeAbilityPanel(Driver.TEXT2);
-		assertEquals(2, c.dScreen.actionList.size());
-		assertFalse(c.dScreen.actionList.contains(p2.getName()));
-		try{
-			c.setNightTarget(p1, p2, Driver.TEXT2);
-			fail();
-		}catch(PlayerTargetingException e){}
-		assertEquals(2, c.dScreen.actionList.size());
+		assertTrue(p1.getActions().isTargeting(Player.list(p2,p3), Role.MAIN_ABILITY));
+		assertFalse(getCheckbox(c.dScreen, p1.getName(), 0).isChecked());
 	}
 	
 	public void testSkipDayText(){
@@ -555,6 +663,13 @@ public class PhoneGUITests extends TestCase{
 		
 		h.getController().vote(p1, p2);
 		assertEquals(1, p2.getVoteCount());
+		
+		boolean containsP2 = false;
+		for(String s: h.getController().dScreen.getCheckedPlayers(0)){
+			if(s.contains(p2.getName()))
+				containsP2 = true;
+		}
+		assertTrue(containsP2);
 		h.getController().unvote(p1);
 		
 		assertTrue(p2.getVoters().isEmpty());
@@ -566,7 +681,7 @@ public class PhoneGUITests extends TestCase{
 		ad.actionLV.click(0);
 		ad.actionLV.click(1);
 		
-		assertEquals(1, ad.actionLV.getCheckedItemPosition());
+		assertTrue(getCheckbox(h.getController().dScreen, ad.actionList.get(1), 0).isChecked());
 	}
 	
 }
