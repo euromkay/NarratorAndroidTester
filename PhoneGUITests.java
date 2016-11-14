@@ -159,22 +159,49 @@ public class PhoneGUITests extends TestCase{
 		assertEquals(View.VISIBLE, getCheckbox(c.dScreen, w1.getName(), 0).getVisibility());
 		assertEquals(View.VISIBLE, getCheckbox(c.dScreen, w1.getName(), 1).getVisibility());
 		
+		// [] []
 		c.clickPlayer(w1);
-		assertTrue(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
-		assertFalse(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
-		
-		c.clickPlayer(w1);
+		// X []
 		assertFalse(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
 		assertTrue(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
 		assertEquals(1, ta.clicked.size());
+		TargetablesAdapter.ClickAction ca = new TargetablesAdapter.ClickAction(w1.getName(), getCheckbox(c.dScreen, w1.getName(), 1));
+		assertTrue(ta.clicked.contains(ca));
 		
+		// X []
 		c.clickPlayer(w1);
+    	// [] X
+		assertEquals(1, ta.clicked.size());
+		assertTrue(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
+		assertFalse(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		assertEquals(1, ta.clicked.size());
+		
+		// [] X
+		c.clickPlayer(w1);
+		// X  X
+		assertFalse(p1.getActions().isEmpty());
+		assertTrue(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
+		assertTrue(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		assertEquals(2, ta.clicked.size());
+		
+		
+		// X X
+		c.clickPlayer(w1);
+		// [] []
 		assertTrue(p1.getActions().isEmpty());
 		assertFalse(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
 		assertFalse(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
+		assertEquals(0, ta.clicked.size());
 		
+		// [] []
 		c.clickPlayer(w1, 0);
+		// [] [X]
+		assertFalse(p1.getActions().isTargeting(Player.list(w1, w1), Witch.MAIN_ABILITY));
+		
+		// [] [X]
 		c.clickPlayer(w1, 1);
+		// X X
+		assertTrue(p1.getActions().isTargeting(Player.list(w1, w1), Witch.MAIN_ABILITY));
 		assertTrue(getCheckbox(c.dScreen, w1.getName(), 0).isChecked());
 		assertTrue(getCheckbox(c.dScreen, w1.getName(), 1).isChecked());
 		assertTrue(p1.getActions().isTargeting(Player.list(w1, w1), Witch.MAIN_ABILITY));
@@ -187,13 +214,62 @@ public class PhoneGUITests extends TestCase{
 
 		c.clickPlayer(w2, 1);
 		c.clickPlayer(w1, 0);
+		
 		assertFalse(p1.getActions().isEmpty());
+		assertFalse(p1.getActions().isTargeting(Player.list(w2, w2), Role.MAIN_ABILITY));
 		assertTrue(p1.getActions().isTargeting(Player.list(w2, w1), Role.MAIN_ABILITY));
 		assertFalse(p1.getActions().isTargeting(Player.list(w1, w2), Role.MAIN_ABILITY));
 		assertEquals(1, c.dScreen.getCheckedPlayers(0).size());
 		assertEquals(1, c.dScreen.getCheckedPlayers(1).size());
 		assertEquals(w2.getName(), c.dScreen.getCheckedPlayers(1).get(0));
 		assertEquals(w1.getName(), c.dScreen.getCheckedPlayers(0).get(0));
+		
+		c.clickPlayer(w2, 0);
+		assertFalse(p1.getActions().isEmpty());
+		assertTrue(p1.getActions().isTargeting(Player.list(w2, w2), Role.MAIN_ABILITY));
+		assertEquals(1, c.dScreen.getCheckedPlayers(0).size());
+		assertEquals(1, c.dScreen.getCheckedPlayers(1).size());
+		assertEquals(w2.getName(), c.dScreen.getCheckedPlayers(1).get(0));
+		assertEquals(w2.getName(), c.dScreen.getCheckedPlayers(0).get(0));
+		
+	}
+	
+	public void testWitchDeselectTest2(){
+		IOWrapper wrap = new IOWrapper();
+		
+		Host h1 = wrap.startHost();  //no seed means no setting what seed we're using
+		h1.newPlayer("w1");
+		h1.newPlayer("w2");
+		
+		h1.addRole(BasicRoles.Witch(), "Neutrals");
+		h1.addRole(BasicRoles.Witch(), "Neutrals");
+		h1.addRole(BasicRoles.BusDriver(), "Town");
+		
+		h1.nightStart();
+		h1.clickStart(new Long(0));
+
+		PlayerList pl = h1.getPlayers();
+		Player p1 = pl.getFirst(), w1 = pl.get(1), w2 = pl.get(2);
+		
+		assertTrue(p1.is(Witch.class));
+		GUIController c = (GUIController) h1.getController();
+
+		c.selectSlave(p1);
+		c.actionPanelClick();
+		c.swipeAbilityPanel(Witch.Control);
+		
+		TargetablesAdapter ta = c.dScreen.targetablesAdapter;
+		
+		c.clickPlayer(w1, 0);
+		assertEquals(1, ta.clicked.size());
+		
+		c.clickPlayer(w1, 1);
+		assertEquals(2, ta.clicked.size());
+		
+		c.clickPlayer(w2, 1);
+		assertEquals(2, ta.clicked.size());
+		
+		c.clickPlayer(w2, 1);
 	}
 	
 	public void testStartScreen(){
@@ -287,6 +363,12 @@ public class PhoneGUITests extends TestCase{
 		
 		assertTrue(p1.getActions().isTargeting(Player.list(p2,p3), Role.MAIN_ABILITY));
 		assertFalse(getCheckbox(c.dScreen, p1.getName(), 0).isChecked());
+		assertEquals(2, ta.clicked.size());
+
+		c.clickPlayer(p3, 0);
+		assertEquals(1, ta.clicked.size());
+
+		c.clickPlayer(p3, 0);
 	}
 	
 	public void testSkipDayText(){
