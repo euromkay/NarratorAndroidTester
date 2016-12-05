@@ -581,13 +581,13 @@ public class ServerTests extends TestCase{
 		te.l2.click(8);//hopefully bd
 		nSwitch.consumeAll();
 		assertEquals(1, te.l1.size());
-		assertEquals(10, randomRoles.size());
+		assertEquals(11, randomRoles.size());
 		
 		
 		te.l2.click(13);//hopefully escort
 		nSwitch.consumeAll();
 		assertEquals(2, te.l1.size());
-		assertEquals(11, randomRoles.size());
+		assertEquals(12, randomRoles.size());
 		
 
 		te.l2.click(19);
