@@ -58,6 +58,8 @@ public class ServerTests extends TestCase{
 			public void onSwitchMessage(String s){
 				try {
 					JSONObject jo = new JSONObject(s);
+					if(jo.has("server") && jo.getBoolean("server"))
+						return;
 					String receiver = jo.getString("name");
 					for(Environment e: wrap.envs){
 						NActivity na = (NActivity) e.getActive();
