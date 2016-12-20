@@ -1,5 +1,6 @@
 package iowrapper;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import json.JSONException;
@@ -8,7 +9,7 @@ import nnode.NodeSwitch;
 
 public class SwitchWrapper {
 	NodeSwitch nSwitch;
-	public SwitchWrapper(){
+	public SwitchWrapper() throws SQLException{
 		nSwitch = new NodeSwitch();
 		messages = new ArrayList<>();
 	}
@@ -30,7 +31,7 @@ public class SwitchWrapper {
 			String message = messages.remove(0);
 			nSwitch.handleMessage(message);
 			return message;
-		} catch (JSONException e) {
+		} catch (JSONException | SQLException e) {
 			e.printStackTrace();
 		}
 		return null;

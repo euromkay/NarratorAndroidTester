@@ -1,5 +1,6 @@
 package iowrapper;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.java_websocket.client.WebSocketClient;
@@ -44,7 +45,11 @@ public class ServerTests extends TestCase{
 	
 	private static SwitchWrapper nSwitch;
 	private void startSwitch(IOWrapper wrap){
-		nSwitch = new SwitchWrapper();
+		try {
+			nSwitch = new SwitchWrapper();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		pseudoConnect(wrap);
 	}
 	

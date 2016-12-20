@@ -1,5 +1,6 @@
 package iowrapper;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import android.texting.CommunicatorText;
@@ -131,18 +132,24 @@ public class TextTests extends TestCase{
 		n.addRole(BasicRoles.Mafioso());
 		n.addRole(BasicRoles.SerialKiller());
 		
-		NodeSwitch ns = new NodeSwitch();
-		Instance i = new Instance(ns);
+		NodeSwitch ns = null;
+		try {
+			ns = new NodeSwitch();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		
 		
 		try {
+			Instance i = new Instance(ns);
+			
 			JSONObject jo = new JSONObject();
 			jo.put("message", "say null -prefer Serial Killer");
 			jo.put("name", "A");
 			WebPlayer np = new WebPlayer("A", ns);
 			np.player = a;
 			i.handlePlayerMessage(np, jo);
-		} catch (JSONException e) {
+		} catch (JSONException | SQLException e) {
 			e.printStackTrace();
 			fail();
 		}
