@@ -38,7 +38,7 @@ public class SwitchWrapper {
 	}
 
 	public void consumeAll() {
-		for(int i = 0; i < messages.size(); i++){
+		while(!messages.isEmpty()){
 			consume();
 		}
 		

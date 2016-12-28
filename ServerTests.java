@@ -16,6 +16,7 @@ import android.app.FragmentManager;
 import android.day.ActivityDay;
 import android.day.DayScreenController;
 import android.os.Bundle;
+import android.parse.Server;
 import android.screens.ActivityHome;
 import android.screens.SimpleGestureFilter;
 import android.setup.ActivityCreateGame;
@@ -53,6 +54,16 @@ public class ServerTests extends TestCase{
 		pseudoConnect(wrap);
 	}
 	
+	public void runTest() throws Throwable{
+		Server.testing = true;
+		super.runTest();
+	}
+	
+	public void tearDown() throws Exception{
+		Server.testing = true;
+		super.tearDown();
+	}
+	
 	private void pseudoConnect(IOWrapper wrap){
 		WebSocketClient.wl = new WebListener(){
 			public void onMessageReceive(String message) {
@@ -68,7 +79,7 @@ public class ServerTests extends TestCase{
 					String receiver = jo.getString("name");
 					for(Environment e: wrap.envs){
 						NActivity na = (NActivity) e.getActive();
-						String iName = na.server.GetCurrentUserName();
+						String iName = na.ns.server.GetCurrentUserName();
 						if(iName.equals(receiver)){
 							na.ns.mWebSocketClient.onMessage(s);
 							break;
@@ -101,10 +112,10 @@ public class ServerTests extends TestCase{
 		startSwitch(wrap);
 		Host h1 = wrap.initHost();
 		ActivityHome ah = (ActivityHome) h1.getEnvironment().getActive();
-		assertFalse(ah.server.IsLoggedIn());
+		assertFalse(ah.ns.server.IsLoggedIn());
 		
 		h1.login(0);
-		assertTrue(ah.server.IsLoggedIn());
+		assertTrue(ah.ns.server.IsLoggedIn());
 		
 		h1.clickButton(R.id.home_join);
 		nSwitch.consume();
@@ -151,10 +162,10 @@ public class ServerTests extends TestCase{
 		startSwitch(wrap);
 		Host h1 = wrap.initHost();
 		ActivityHome ah = (ActivityHome) h1.getEnvironment().getActive();
-		assertFalse(ah.server.IsLoggedIn());
+		assertFalse(ah.ns.server.IsLoggedIn());
 		
 		h1.login(0);
-		assertTrue(ah.server.IsLoggedIn());
+		assertTrue(ah.ns.server.IsLoggedIn());
 		
 		h1.clickButton(R.id.home_host);
 		nSwitch.consume();
@@ -182,6 +193,7 @@ public class ServerTests extends TestCase{
 			c.joinGame();
 			interacters.add(c);
 		}
+		nSwitch.consumeAll();
 		return interacters;
 	}
 	
@@ -369,15 +381,15 @@ public class ServerTests extends TestCase{
 		
 		Client c1 = wrap.initClient();
 		ActivityHome c1_ah = (ActivityHome) c1.getEnvironment().getActive();
-		assertFalse(c1_ah.server.IsLoggedIn());
+		assertFalse(c1_ah.ns.server.IsLoggedIn());
 		c1.login(1);
-		assertTrue(c1_ah.server.IsLoggedIn());
+		assertTrue(c1_ah.ns.server.IsLoggedIn());
 		
 		Client c2 = wrap.initClient();
 		ActivityHome c2_ah = (ActivityHome) c2.getEnvironment().getActive();
-		assertFalse(c2_ah.server.IsLoggedIn());
+		assertFalse(c2_ah.ns.server.IsLoggedIn());
 		c2.login(2);
-		assertTrue(c2_ah.server.IsLoggedIn());
+		assertTrue(c2_ah.ns.server.IsLoggedIn());
 		
 		h1.clickButton(R.id.home_host);
 		nSwitch.consume(4); //3 greets, 1 host request
@@ -385,7 +397,7 @@ public class ServerTests extends TestCase{
 		c1.clickButton(R.id.home_join);
 		c2.clickButton(R.id.home_join);
 		
-		nSwitch.consume(4); //2 join requests
+		nSwitch.consumeAll();
 		
 		assertEquals(3, nSwitch.nSwitch.instances.get(0).n.getPlayerCount());
 		
@@ -488,6 +500,8 @@ public class ServerTests extends TestCase{
 	public void testVotePersistance(){
 		ArrayList<Interacter> interacters = init(2);
 		Host h = (Host) interacters.get(0);
+		
+		assertTrue(nSwitch.messages.isEmpty());
 		
 		h.addRole(BasicRoles.Mayor(), "Town");
 		h.addRole(BasicRoles.Arsonist(), "Neutrals");

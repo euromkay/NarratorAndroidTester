@@ -11,6 +11,7 @@ import android.day.ActivityDay;
 import android.day.DayScreenController;
 import android.day.TargetablesAdapter;
 import android.graphics.Color;
+import android.parse.Server;
 import android.screens.ListingAdapter;
 import android.setup.ActivityCreateGame;
 import android.setup.SetupScreenController;
@@ -41,6 +42,16 @@ public class PhoneGUITests extends TestCase{
 	
 	public PhoneGUITests(String name) {
 		super(name);
+	}
+	
+	public void runTest() throws Throwable{
+		Server.testing = true;
+		super.runTest();
+	}
+	
+	public void tearDown() throws Exception{
+		Server.testing = true;
+		super.tearDown();
 	}
 	
 	public void testNeutralBenign(){
@@ -404,7 +415,7 @@ public class PhoneGUITests extends TestCase{
 		IOWrapper wrap = new IOWrapper();
 		long seed = new Random().nextLong();
 		//long seed = Long.parseLong("-5740312402763706335");
-		//System.out.println(seed);
+		System.out.println("Single Player :\t " + seed);
 		
 		Host h = wrap.startHost(seed);
 		h.addRole(BasicRoles.MassMurderer(), "Neutrals");

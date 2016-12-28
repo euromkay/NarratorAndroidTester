@@ -64,7 +64,7 @@ public class Client extends Interacter{
 		while(ad.playerMenu == null || ad.playerMenu.adapter == null)
 			Log.m("Client", "waiting for playerMenu to be created before giving out players");
 		JSONArray jArray = ((PlayerDrawerAdapter) ad.playerMenu.adapter).getPlayersInView();
-		if(((NActivity) e.getActive()).server.IsLoggedIn()){
+		if(((NActivity) e.getActive()).ns.server.IsLoggedIn()){
 			return null;
 		}else{
 			Narrator n = ((NActivity) e.getActive()).ns.local;
