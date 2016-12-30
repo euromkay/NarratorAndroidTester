@@ -87,7 +87,7 @@ public class IOWrapper {
 		
 		e.addView(R.id.day_horizontalShimmy);
 		e.addView(R.id.create_info_wrapper);
-		e.addScrollView(R.id.create_chatHolder);
+		e.addListView(R.id.create_chatHolder);
 		e.addView(R.layout.create_team_builder_layout);
 		
 		e.addButton(R.id.home_join);
@@ -101,7 +101,7 @@ public class IOWrapper {
 
 		e.addEditText(R.id.day_chatET, R.id.create_rulesET1, R.id.create_rulesET2, R.id.create_chatET);
 		
-		e.addScrollView(R.id.day_chatHolder);
+		e.addListView(R.id.day_chatHolder);
 		
 		e.addListView(R.id.day_rolesList, R.id.roles_categories_LV, R.id.day_alliesList);
 		e.addListView(R.id.roles_bottomLV, R.id.day_membersLV);

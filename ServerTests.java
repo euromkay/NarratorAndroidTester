@@ -14,6 +14,7 @@ import android.alerts.TeamEditor;
 import android.app.Environment;
 import android.app.FragmentManager;
 import android.day.ActivityDay;
+import android.day.ChatItem;
 import android.day.DayScreenController;
 import android.os.Bundle;
 import android.parse.Server;
@@ -24,7 +25,6 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import json.JSONException;
 import json.JSONObject;
 import junit.framework.TestCase;
@@ -32,13 +32,16 @@ import nnode.Instance;
 import nnode.NodeSwitch.SwitchListener;
 import shared.logic.Narrator;
 import shared.logic.Player;
+import shared.logic.PlayerList;
 import shared.logic.support.Constants;
 import shared.logic.support.Random;
 import shared.logic.support.RoleTemplate;
 import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
 import shared.roles.Arsonist;
+import shared.roles.Doctor;
 import shared.roles.RandomMember;
+import shared.roles.Role;
 import voss.narrator.R;
 
 public class ServerTests extends TestCase{
@@ -356,21 +359,23 @@ public class ServerTests extends TestCase{
 		EditText hChat = (EditText) h1.getEnvironment().getActive().findViewById(R.id.create_chatET);
 		assertEquals(0, hChat.getText().toString().length());
 		
-		TextView chatTV = (TextView) h1.getEnvironment().getActive().findViewById(R.id.create_chatTV);
+		assertFalse(h1.getActivityCreateGame().chatAdapter.chatReference.isEmpty());
+		/*TextView chatTV = (TextView) h1.getEnvironment().getActive().findViewById(R.id.create_chatTV);
 		String chatContents = chatTV.getText().toString();
-		assertFalse("".equals(chatContents));
+		assertFalse("".equals(chatContents));*/
 		
 		//3 lines should be shown.  2 that people have joined. 1 that host said something.
-		assertEquals(3, chatContents.split("<br>").length);
+		assertEquals(3, h1.getActivityCreateGame().chatAdapter.chatReference.size());
 		
 		
 		Client c2 = (Client) interacters.get(2);
 		c2.chat("sup");
-		chatTV = (TextView) c2.getEnvironment().getActive().findViewById(R.id.create_chatTV);
-		chatContents = chatTV.getText().toString();
 		
-		String[] messages = chatContents.split("<br>");
-		assertTrue(messages[messages.length-1].contains("sup"));
+		for(ChatItem s: c2.getActivityCreateGame().chatAdapter.chatReference){
+			if(s.text.contains("sup"))
+				return;
+		}
+		fail();
 	}
 	
 	public void testTrio(){
@@ -673,10 +678,56 @@ public class ServerTests extends TestCase{
 			}
 		}
 		
-		assertTrue(h.getController().dScreen.chatTV.getText().toString().contains("Night 1"));
-		assertTrue(h.getController().dScreen.chatTV.getText().toString().contains("Night 2"));
+		ArrayList<ChatItem> list = h.getController().dScreen.chatAdapter.chatReference;
+		boolean found1 = false, found2 = false;
+		for(ChatItem s: list){
+			if(!found1 && s.text.contains("Night 1"))
+				found1 = true;
+			if(!found2 && s.text.contains("Night 2"))
+				found2 = true;
+			if(found1 && found2)
+				break;
+		}
+			
+		assertTrue(found1);
+		assertTrue(found2);
 	}
 
+	public void testBasicTargeting(){
+		ArrayList<Interacter> interacters = init(2);
+		Host h = (Host) interacters.get(0);
+		
+		h.addRole(BasicRoles.Doctor(), "Town");
+		h.addRole(BasicRoles.SerialKiller(), "Neutrals");
+		h.addRole(BasicRoles.Bodyguard(), "Town");
+		
+		setNightStart();
+		
+		Instance i = getInstance();
+		h.clickStart();
+		
+		
+		PlayerList pl = i.n._players.copy();
+		Player p = i.n._players.getPlayerByName(interacters.get(2).getName());
+		Player q = pl.remove(p).getFirst();
+		
+		GUIController gui = (GUIController) interacters.get(2).getController();
+		assertEquals(Doctor.NIGHT_ACTION_DESCRIPTION, gui.dScreen.roleInfoTV.getText().toString());
+
+		gui.setNightTarget(p, q);
+		nSwitch.consumeAll();
+		assertTrue(p.getActions().isTargeting(q, Role.MAIN_ABILITY));
+	}
+	
+	public Instance getInstance(){
+		return nSwitch.nSwitch.instances.get(0);
+	}
+	
+	public void setNightStart(){
+		Instance curInstance = getInstance();
+		curInstance.n.getRules().setBool(Rules.DAY_START, Narrator.NIGHT_START);
+		curInstance.n.setSeed(0);
+	}
 	
 	public void testEndNightPersistance(){
 		ArrayList<Interacter> interacters = init(2);

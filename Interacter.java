@@ -188,6 +188,10 @@ public abstract class Interacter {
 		return (ActivityCreateGame) getActivity();
 	}
 	
+	public ActivityDay getActivityDay() {
+		return (ActivityDay) getActivity();
+	}
+	
 	public NActivity getActivity() {
 		return (NActivity) getEnvironment().getActive();
 	}
