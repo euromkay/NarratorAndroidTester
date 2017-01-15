@@ -125,6 +125,7 @@ public class IOWrapper {
 		e.addButton(R.id.create_chatButton);
 		e.addButton(R.id.roles_show_Players);
 		e.addButton(R.id.roles_startGame);
+		e.addButton(R.id.roles_leaveGame);
 		e.addButton(R.id.day_messagesButton);
 		e.addButton(R.id.day_infoButton);
 		e.addButton(R.id.day_button);

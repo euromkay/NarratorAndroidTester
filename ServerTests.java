@@ -331,7 +331,7 @@ public class ServerTests extends TestCase{
 		ArrayList<Interacter> interacters = init(2);
 		Client client = (Client) interacters.get(1);
 		
-		client.clickButton(R.id.roles_startGame);
+		client.clickButton(R.id.roles_leaveGame);
 		assertEquals(client.getActivity().getClass(), ActivityHome.class);
 		nSwitch.consume();
 		assertEquals(2, nSwitch.nSwitch.instances.get(0).n.getPlayerCount());
