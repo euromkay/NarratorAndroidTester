@@ -20,6 +20,7 @@ import shared.logic.PlayerList;
 import shared.logic.Team;
 import shared.logic.support.rules.Rules;
 import shared.logic.templates.BasicRoles;
+import shared.logic.templates.Setup;
 import shared.roles.Citizen;
 import shared.roles.SerialKiller;
 import voss.narrator.R;
@@ -74,7 +75,8 @@ public class TextTests extends TestCase{
 	}
 	
 	public void testMafiaDeadSend(){
-		Narrator n = Narrator.Default();
+		Narrator n = new Narrator();
+		Setup.Default(n);
 		n.addPlayer("A");
 		n.addPlayer("B");
 		n.addPlayer("C");
@@ -123,7 +125,8 @@ public class TextTests extends TestCase{
 	}
 	
 	public void testInstancePreferring(){
-		Narrator n = Narrator.Default();
+		Narrator n = new Narrator();
+		Setup.Default(n);
 		Player a = n.addPlayer("A");
 		n.addPlayer("B");
 		n.addPlayer("C");
