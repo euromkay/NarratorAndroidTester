@@ -149,7 +149,7 @@ public class TextTests extends TestCase{
 			JSONObject jo = new JSONObject();
 			jo.put("message", "say null -prefer Serial Killer");
 			jo.put("name", "A");
-			WebPlayer np = new WebPlayer("A", ns);
+			WebPlayer np = new WebPlayer("A", "A", ns);
 			np.player = a;
 			i.handlePlayerMessage(np, jo);
 		} catch (JSONException | SQLException e) {
