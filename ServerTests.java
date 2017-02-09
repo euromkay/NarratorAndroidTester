@@ -264,7 +264,7 @@ public class ServerTests extends TestCase{
 		
 		Player host = curInstance.n.getPlayerByName("voss");
 		assertTrue(host.is(Arsonist.class));
-		assertTrue(host.hasDayAction());
+		assertTrue(host.hasDayAction(Role.MAIN_ABILITY));
 		assertTrue(curInstance.n.isDay());
 		
 		ActivityDay ad = (ActivityDay) h.getActivity();
@@ -522,7 +522,7 @@ public class ServerTests extends TestCase{
 		
 		Player host = curInstance.n.getPlayerByName("voss");
 		assertTrue(host.is(Arsonist.class));
-		assertTrue(host.hasDayAction());
+		assertTrue(host.hasDayAction(Role.MAIN_ABILITY));
 		assertTrue(curInstance.n.isDay());
 		
 		ActivityDay ad = (ActivityDay) h.getActivity();
