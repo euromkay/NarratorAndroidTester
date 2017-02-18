@@ -711,7 +711,7 @@ public class PhoneGUITests extends TestCase{
 		
 		TeamEditor te = (TeamEditor) ac.getFragmentManager().getFragment(null, "editTeam");
 		ListingAdapter la2 = (ListingAdapter) te.l2.adapter;
-		int posOfCit = la2.data.indexOf(Citizen.ROLE_NAME);
+		int posOfCit = la2.data.indexOf(Citizen.class.getSimpleName());
 		
 		te.l2.click(posOfCit);//get it? piece of poop
 		te.l2.click(0);
